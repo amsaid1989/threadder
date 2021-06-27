@@ -1,3 +1,5 @@
+import Header from "./components/Header";
+
 export default function App(props) {
-    return "Hello World";
+    return <Header loggedIn={false} />;
 }
