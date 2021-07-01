@@ -2,9 +2,8 @@ import { makeStyles } from "@material-ui/core/styles";
 import classNames from "classnames";
 import Container from "@material-ui/core/Container";
 import Grid from "@material-ui/core/Grid";
-import Typography from "@material-ui/core/Typography";
-import Button from "@material-ui/core/Button";
 import StyledButton from "./StyledButton";
+import Tweet from "./Tweet";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -21,6 +20,12 @@ const useStyles = makeStyles((theme) => ({
     },
     fixedSizeFlexItem: {
         flex: 0,
+    },
+    autoOverflow: {
+        overflow: "auto",
+    },
+    hiddenOverflow: {
+        overflow: "hidden",
     },
     tweetsContainer: {
         padding: "1.5em",
@@ -40,15 +45,24 @@ export default function TweetInput(props) {
     const classes = useStyles();
 
     // TODO: Implement the Tweet component that will be used here
-    const tweets = props.thread.map((tweet, index) => (
-        <p key={tweet}>{`${index} - ${tweet}`}</p>
+    const tweets = props.thread.map((tweet, index, arr) => (
+        <Tweet
+            key={tweet}
+            user={props.user}
+            text={tweet}
+            threadLine={index + 1 < arr.length}
+        />
     ));
 
     return (
         <Grid
             container
             spacing={2}
-            className={classNames(classes.root, classes.fullHeight)}
+            className={classNames(
+                classes.root,
+                classes.fullHeight,
+                classes.hiddenOverflow
+            )}
         >
             {/* GRID ITEM 01: Thread List */}
             <Grid
@@ -56,14 +70,16 @@ export default function TweetInput(props) {
                 xs={12}
                 className={classNames(
                     classes.expandingFlexItem,
-                    classes.fullHeight
+                    classes.fullHeight,
+                    classes.hiddenOverflow
                 )}
             >
                 <Container
                     className={classNames(
                         classes.tweetsContainer,
                         classes.fullHeight,
-                        classes.containerWithShadow
+                        classes.containerWithShadow,
+                        classes.autoOverflow
                     )}
                 >
                     {tweets}
@@ -89,6 +105,7 @@ export default function TweetInput(props) {
                     <StyledButton
                         variant="contained"
                         color="secondary"
+                        disabled={!tweets.length > 0}
                         fullWidth
                     >
                         Publish thread

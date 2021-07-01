@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { makeStyles, ThemeProvider } from "@material-ui/core/styles";
+import classNames from "classnames";
 import theme from "./threadder-theme";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import Container from "@material-ui/core/Container";
@@ -11,6 +12,7 @@ import ThreadViewer from "./components/ThreadViewer";
 const useStyles = makeStyles((theme) => ({
     root: {
         height: "100vh",
+        maxHeight: "100vh",
     },
     gridContainer: {
         flexFlow: "column nowrap",
@@ -22,22 +24,33 @@ const useStyles = makeStyles((theme) => ({
     mainArea: {
         flex: 1,
     },
+    hiddenOverflow: {
+        overflow: "hidden",
+    },
 }));
 
 export default function App(props) {
     const classes = useStyles();
 
+    /* APP STATE */
     const [loggedIn, setLoggedIn] = useState(false);
+    const [user, setUser] = useState({
+        name: "Untitled User",
+        handle: "untitled_user",
+    });
     const [tweetText, setTweetText] = useState("");
     const [thread, setThread] = useState([]);
     const [editing, setEditing] = useState(true);
+    /* END APP STATE */
 
+    /* EVENT HANDLERS */
     const updateTweet = (event) => {
         setTweetText(event.target.value);
     };
     const toggleEditing = () => {
         setEditing(!editing);
     };
+    /* END EVENT HANDLERS */
 
     return (
         <ThemeProvider theme={theme}>
@@ -52,7 +65,14 @@ export default function App(props) {
                             <Header loggedIn={loggedIn} />
                         </Grid>
 
-                        <Grid item xs={12} className={classes.mainArea}>
+                        <Grid
+                            item
+                            xs={12}
+                            className={classNames(
+                                classes.mainArea,
+                                classes.hiddenOverflow
+                            )}
+                        >
                             {editing ? (
                                 <TweetInput
                                     tweetText={tweetText}
@@ -62,6 +82,7 @@ export default function App(props) {
                                 />
                             ) : (
                                 <ThreadViewer
+                                    user={user}
                                     thread={thread}
                                     editThreadHandler={toggleEditing}
                                 />

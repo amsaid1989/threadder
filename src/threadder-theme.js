@@ -12,7 +12,10 @@ const secondaryPalette = {
     main: "#ffc107",
     light: "#ffd147",
     dark: "#c97d02",
+    hover: "#ffa042",
+    inactive: "#432a01",
     contrastText: "#14213d",
+    inactiveText: "#111111",
 };
 
 const backgroundPalette = {

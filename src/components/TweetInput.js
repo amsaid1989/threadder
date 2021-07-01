@@ -84,9 +84,8 @@ export default function TweetInput(props) {
                         )}
                         onChange={props.handleTweetInput}
                         placeholder="Type your tweet here..."
-                    >
-                        {props.tweetText}
-                    </textarea>
+                        value={props.tweetText}
+                    />
                 </Container>
             </Grid>
 

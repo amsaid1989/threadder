@@ -4,8 +4,12 @@ import Button from "@material-ui/core/Button";
 
 const useStyles = makeStyles((theme) => ({
     styledButton: {
+        "&:disabled": {
+            color: theme.palette.secondary.inactiveText,
+            backgroundColor: theme.palette.secondary.inactive,
+        },
         "&:hover": {
-            backgroundColor: "#ffa042",
+            backgroundColor: theme.palette.secondary.hover,
         },
     },
 }));
