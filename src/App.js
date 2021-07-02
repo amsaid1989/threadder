@@ -11,10 +11,17 @@ import ThreadViewer from "./components/ThreadViewer";
 
 const useStyles = makeStyles((theme) => ({
     root: {
+        /*
+         * Styles that apply to the main Container component of the App
+         */
         height: "100vh",
         maxHeight: "100vh",
     },
     gridContainer: {
+        /*
+         * A class for the main grid layout of the App. It organises all
+         * the main elements of the App in a column layout.
+         */
         flexFlow: "column nowrap",
         height: "100%",
     },
@@ -45,9 +52,20 @@ export default function App(props) {
 
     /* EVENT HANDLERS */
     const updateTweet = (event) => {
+        /*
+         * Handles user input in the textarea where the user
+         * types the tweet they want to split into a thread.
+         */
+
         setTweetText(event.target.value);
     };
     const toggleEditing = () => {
+        /*
+         * Handles switching between editing the tweet and
+         * viewing the thread when the app is used on mobile
+         * phones
+         */
+
         setEditing(!editing);
     };
     /* END EVENT HANDLERS */
@@ -65,6 +83,15 @@ export default function App(props) {
                             <Header loggedIn={loggedIn} />
                         </Grid>
 
+                        {/*
+                         * The main element of the App which display the tweet input
+                         * and the thread viewer. It uses the hiddenOverflow class to
+                         * make sure that no overflow happens when the number of tweets
+                         * displayed in the ThreadViewer is too large.
+                         * When overflow happens, the inner components of the ThreadViewer
+                         * handles it so that the area where the tweets are displayed
+                         * show a scroll bar.
+                         */}
                         <Grid
                             item
                             xs={12}
@@ -73,6 +100,10 @@ export default function App(props) {
                                 classes.hiddenOverflow
                             )}
                         >
+                            {/*
+                             * Conditionally render either the TweetInput or the ThreadViewer
+                             * when in mobile view.
+                             */}
                             {editing ? (
                                 <TweetInput
                                     tweetText={tweetText}

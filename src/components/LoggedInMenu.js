@@ -6,6 +6,12 @@ import Avatar from "@material-ui/core/Avatar";
 import StyledMenu from "./StyledMenu";
 import MenuItem from "@material-ui/core/MenuItem";
 
+/*
+ * The styles and implementation of the menu component that
+ * is rendered when the user is logged in to their Twitter
+ * account.
+ */
+
 const useStyles = makeStyles((theme) => ({
     menuList: {
         border: `solid 1px ${theme.palette.primary.dark}`,
@@ -22,10 +28,19 @@ const useStyles = makeStyles((theme) => ({
 export default function LoggedInMenu(props) {
     const classes = useStyles();
 
+    /* COMPONENT STATE */
     // Generate the anchor element which will be used to trigger the menu
     const [anchorEl, setAnchorEl] = useState(null);
+    /* END COMPONENT STATE */
 
+    /* EVENT HANDLERS */
     const handleAvatarClick = (event) => {
+        /*
+         * This is used to set the Avatar as an anchor element for the
+         * menu. In effect, it expands the menu whenever the Avatar is
+         * clicked by the user.
+         */
+
         // Use currentTarget instead of target to ensure that it grabs
         // the parent div rather than any of the child elements
         setAnchorEl(event.currentTarget);
@@ -48,12 +63,14 @@ export default function LoggedInMenu(props) {
         // TODO: Implement
         console.log("logging out");
     };
+    /* END EVENT HANDLERS */
 
     return (
         <Box>
             <IconButton size="small" onClick={handleAvatarClick}>
                 <Avatar />
             </IconButton>
+
             <StyledMenu
                 id="account-settings-menu"
                 getContentAnchorEl={null}
@@ -71,6 +88,7 @@ export default function LoggedInMenu(props) {
                 >
                     Go to Twitter
                 </MenuItem>
+
                 <MenuItem className={classes.menuItem} onClick={logOut}>
                     Log out
                 </MenuItem>

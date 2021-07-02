@@ -1,5 +1,9 @@
 import { createMuiTheme } from "@material-ui/core/styles";
 
+/*
+ * Threadder's main theme
+ */
+
 const primaryPalette = {
     main: "#283845",
     light: "#395164",

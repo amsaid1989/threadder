@@ -3,8 +3,22 @@ import classNames from "classnames";
 import Grid from "@material-ui/core/Grid";
 import Avatar from "@material-ui/core/Avatar";
 
+/*
+ * The style and implementation of the Tweet component which is used
+ * by the ThreadViewer to display the split tweets in a format that
+ * is familiar to a Twitter user.
+ * It shows a picture of the logged in user, the user's name and
+ * their Twitter handle, as well as the text for each of the tweets.
+ */
+
 const useStyles = makeStyles((theme) => ({
     root: {
+        /*
+         * Styles that apply to the main container of the Tweet component.
+         * It adds a margin to the bottom of the component if there are
+         * multiple tweets displayed. If the tweet is the last one, or the
+         * only one, in the thread, then no margin is added.
+         */
         marginBottom: "1em",
         flexFlow: "row nowrap",
         "&:last-child": {
@@ -28,14 +42,30 @@ const useStyles = makeStyles((theme) => ({
         padding: "0.4em",
     },
     threadLine: {
+        /*
+         * A class that controls the appearance of the line that
+         * visually connects each tweet to the following one in
+         * the thread.
+         * This lines serves no functional purpose. It is just
+         * a visual cue, that is already used by Twitter, to
+         * indicate that these tweets belong together in the same
+         * thread.
+         */
         width: "2px",
-        height: "calc(100% + 1em)", // Adds the marginBottom value from the root to the height
+
+        // Add the marginBottom value from the root to the height
+        height: "calc(100% + 1em)",
+
         backgroundColor: theme.palette.background.default,
     },
     tweetContainer: {
         marginLeft: "1em",
     },
     resetFont: {
+        /*
+         * A helper class to make sure that an element uses the parent's
+         * font family and font size
+         */
         fontFamily: "inherit",
         fontSize: "inherit",
     },
@@ -53,6 +83,12 @@ const useStyles = makeStyles((theme) => ({
         padding: 0,
         margin: 0,
         marginTop: "0.25em",
+
+        /*
+         * This ensures that any line breaks or extra white spaces added
+         * by the user in the TweetInput component is not discarded when
+         * displayed in the Tweet component.
+         */
         whiteSpace: "pre-wrap",
     },
 }));
