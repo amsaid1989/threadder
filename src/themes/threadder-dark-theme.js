@@ -27,7 +27,7 @@ const backgroundPalette = {
     default: "#202c39",
 };
 
-export default createMuiTheme({
+const darkTheme = createMuiTheme({
     palette: {
         primary: primaryPalette,
         secondary: secondaryPalette,
@@ -38,3 +38,5 @@ export default createMuiTheme({
         borderRadius: 2,
     },
 });
+
+export default darkTheme;

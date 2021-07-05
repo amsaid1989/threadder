@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { makeStyles, ThemeProvider } from "@material-ui/core/styles";
 import classNames from "classnames";
-import theme from "../threadder-theme";
+import darkTheme from "../themes/threadder-dark-theme";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import Container from "@material-ui/core/Container";
 import Grid from "@material-ui/core/Grid";
@@ -80,7 +80,7 @@ export default function App(props) {
     /* END EVENT HANDLERS */
 
     return (
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={darkTheme}>
             <CssBaseline>
                 <Container className={classes.root}>
                     <Grid
