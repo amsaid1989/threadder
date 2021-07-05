@@ -79,25 +79,6 @@ export default function App(props) {
     };
     /* END EVENT HANDLERS */
 
-    /* SET UP COMPONENTS */
-    const tweetInput = (
-        <TweetInput
-            tweetText={tweetText}
-            handleTweetInput={updateTweet}
-            thread={thread}
-            viewThreadHandler={toggleEditing}
-        />
-    );
-
-    const threadViewer = (
-        <ThreadViewer
-            user={user}
-            thread={thread}
-            editThreadHandler={toggleEditing}
-        />
-    );
-    /* END SET UP COMPONENTS */
-
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline>
@@ -113,49 +94,46 @@ export default function App(props) {
 
                         <Grid
                             item
+                            xs={12}
                             className={classNames(
                                 classes.appView,
                                 classes.hiddenOverflow
                             )}
                         >
-                            <Hidden mdUp>
+                            <Hidden smDown={!editing}>
                                 <Grid
                                     item
                                     xs={12}
+                                    md={7}
                                     className={classNames(
                                         classes.mainArea,
                                         classes.hiddenOverflow
                                     )}
                                 >
-                                    {/*
-                                     * Conditionally render either the TweetInput or the ThreadViewer
-                                     * when in mobile view.
-                                     */}
-                                    {editing ? tweetInput : threadViewer}
+                                    <TweetInput
+                                        tweetText={tweetText}
+                                        handleTweetInput={updateTweet}
+                                        thread={thread}
+                                        viewThreadHandler={toggleEditing}
+                                    />
                                 </Grid>
                             </Hidden>
 
-                            <Hidden smDown>
+                            <Hidden smDown={editing}>
                                 <Grid
                                     item
-                                    xs={7}
+                                    xs={12}
+                                    md={5}
                                     className={classNames(
                                         classes.mainArea,
                                         classes.hiddenOverflow
                                     )}
                                 >
-                                    {tweetInput}
-                                </Grid>
-
-                                <Grid
-                                    item
-                                    xs={5}
-                                    className={classNames(
-                                        classes.mainArea,
-                                        classes.hiddenOverflow
-                                    )}
-                                >
-                                    {threadViewer}
+                                    <ThreadViewer
+                                        user={user}
+                                        thread={thread}
+                                        editThreadHandler={toggleEditing}
+                                    />
                                 </Grid>
                             </Hidden>
                         </Grid>
