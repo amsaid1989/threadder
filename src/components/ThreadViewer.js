@@ -3,6 +3,7 @@ import classNames from "classnames";
 import Container from "@material-ui/core/Container";
 import Grid from "@material-ui/core/Grid";
 import StyledButton from "./StyledButton";
+import Hidden from "@material-ui/core/Hidden";
 import Tweet from "./Tweet";
 
 const useStyles = makeStyles((theme) => ({
@@ -94,14 +95,17 @@ export default function TweetInput(props) {
                         classes.fullHeight
                     )}
                 >
-                    <StyledButton
-                        variant="contained"
-                        color="secondary"
-                        fullWidth
-                        onClick={props.editThreadHandler}
-                    >
-                        Edit thread
-                    </StyledButton>
+                    <Hidden mdUp>
+                        <StyledButton
+                            variant="contained"
+                            color="secondary"
+                            fullWidth
+                            onClick={props.editThreadHandler}
+                        >
+                            Edit thread
+                        </StyledButton>
+                    </Hidden>
+
                     <StyledButton
                         variant="contained"
                         color="secondary"

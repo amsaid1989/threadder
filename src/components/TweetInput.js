@@ -4,6 +4,7 @@ import Container from "@material-ui/core/Container";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
 import StyledButton from "./StyledButton";
+import Hidden from "@material-ui/core/Hidden";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -109,16 +110,18 @@ export default function TweetInput(props) {
             </Grid>
 
             {/* GRID ITEM 03: View Thread Button */}
-            <Grid item xs={12} className={classes.fixedSizeFlexItem}>
-                <StyledButton
-                    variant="contained"
-                    color="secondary"
-                    fullWidth
-                    onClick={props.viewThreadHandler}
-                >
-                    View thread
-                </StyledButton>
-            </Grid>
+            <Hidden mdUp>
+                <Grid item xs={12} className={classes.fixedSizeFlexItem}>
+                    <StyledButton
+                        variant="contained"
+                        color="secondary"
+                        fullWidth
+                        onClick={props.viewThreadHandler}
+                    >
+                        View thread
+                    </StyledButton>
+                </Grid>
+            </Hidden>
         </Grid>
     );
 }

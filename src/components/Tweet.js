@@ -90,6 +90,11 @@ const useStyles = makeStyles((theme) => ({
          * displayed in the Tweet component.
          */
         whiteSpace: "pre-wrap",
+
+        overflowWrap: "break-word",
+    },
+    hiddenOverflow: {
+        overflow: "hidden",
     },
 }));
 
@@ -137,7 +142,8 @@ export default function Tweet(props) {
                 className={classNames(
                     classes.expandingFlexItem,
                     classes.verticalGrid,
-                    classes.tweetContainer
+                    classes.tweetContainer,
+                    classes.hiddenOverflow
                 )}
             >
                 {/* Grid item that includes the user information

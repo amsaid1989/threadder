@@ -5,6 +5,7 @@ import theme from "./threadder-theme";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import Container from "@material-ui/core/Container";
 import Grid from "@material-ui/core/Grid";
+import Hidden from "@material-ui/core/Hidden";
 import Header from "./components/Header";
 import TweetInput from "./components/TweetInput";
 import ThreadViewer from "./components/ThreadViewer";
@@ -28,8 +29,16 @@ const useStyles = makeStyles((theme) => ({
     appHeader: {
         flex: 0,
     },
-    mainArea: {
+    appView: {
         flex: 1,
+        [theme.breakpoints.up("md")]: {
+            display: "flex",
+            flexFlow: "row nowrap",
+            gap: theme.spacing(1.5),
+        },
+    },
+    mainArea: {
+        height: "100%",
     },
     hiddenOverflow: {
         overflow: "hidden",
@@ -46,7 +55,12 @@ export default function App(props) {
         handle: "untitled_user",
     });
     const [tweetText, setTweetText] = useState("");
-    const [thread, setThread] = useState([]);
+    const [thread, setThread] = useState([
+        "ECaEXFulJOjlpfaAftISGCgmJJGjtSpNSytrMuzXJJQYWlsMfQMgMWMBhPlDvcWCZddmOdwqDvbitTifJAuCmSYsaBGlPQMmSvHeFVcAMILUcXDxXupBAMyXhMkpYUfYESWefiuXgPWKHKxePSMyGTBYHVfJvjnTCegTXkAlaQYJTyUPOPELJNRtJCeYAXeiZHnqnrdejjBVIIaDjiKcNyPZEFzVjgOboOngFucjsYEJwuLzaCjnBMExPLxqiIQuZeJNiaVGHNvROVRcWONBpdUI",
+        "ECaEXFulJOjlpfaAftISGCgmJJGjtSpNSytrMuzXJJQYWlsMfQMgMWMBhPlDvcWCZddmOdwqDvbitTifJAuCmSYsaBGlPQMmSvHeFVcAMILUcXDxXupBAMyXhMkpYUfYESWefiuXgPWKHKxePSMyGTBYHVfJvjnTCegTXkAlaQYJTyUPOPELJNRtJCeYAXeiZHnqnrdejjBVIIaDjiKcNyPZEFzVjgOboOngFucjsYEJwuLzaCjnBMExPLxqiIQuZeJNiaVGHNvROVRcWONBpdUI",
+        "ECaEXFulJOjlpfaAftISGCgmJJGjtSpNSytrMuzXJJQYWlsMfQMgMWMBhPlDvcWCZddmOdwqDvbitTifJAuCmSYsaBGlPQMmSvHeFVcAMILUcXDxXupBAMyXhMkpYUfYESWefiuXgPWKHKxePSMyGTBYHVfJvjnTCegTXkAlaQYJTyUPOPELJNRtJCeYAXeiZHnqnrdejjBVIIaDjiKcNyPZEFzVjgOboOngFucjsYEJwuLzaCjnBMExPLxqiIQuZeJNiaVGHNvROVRcWONBpdUI",
+        "ECaEXFulJOjlpfaAftISGCgmJJGjtSpNSytrMuzXJJQYWlsMfQMgMWMBhPlDvcWCZddmOdwqDvbitTifJAuCmSYsaBGlPQMmSvHeFVcAMILUcXDxXupBAMyXhMkpYUfYESWefiuXgPWKHKxePSMyGTBYHVfJvjnTCegTXkAlaQYJTyUPOPELJNRtJCeYAXeiZHnqnrdejjBVIIaDjiKcNyPZEFzVjgOboOngFucjsYEJwuLzaCjnBMExPLxqiIQuZeJNiaVGHNvROVRcWONBpdUI",
+    ]);
     const [editing, setEditing] = useState(true);
     /* END APP STATE */
 
@@ -70,6 +84,25 @@ export default function App(props) {
     };
     /* END EVENT HANDLERS */
 
+    /* SET UP COMPONENTS */
+    const tweetInput = (
+        <TweetInput
+            tweetText={tweetText}
+            handleTweetInput={updateTweet}
+            thread={thread}
+            viewThreadHandler={toggleEditing}
+        />
+    );
+
+    const threadViewer = (
+        <ThreadViewer
+            user={user}
+            thread={thread}
+            editThreadHandler={toggleEditing}
+        />
+    );
+    /* END SET UP COMPONENTS */
+
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline>
@@ -83,41 +116,53 @@ export default function App(props) {
                             <Header loggedIn={loggedIn} />
                         </Grid>
 
-                        {/*
-                         * The main element of the App which display the tweet input
-                         * and the thread viewer. It uses the hiddenOverflow class to
-                         * make sure that no overflow happens when the number of tweets
-                         * displayed in the ThreadViewer is too large.
-                         * When overflow happens, the inner components of the ThreadViewer
-                         * handles it so that the area where the tweets are displayed
-                         * show a scroll bar.
-                         */}
                         <Grid
                             item
-                            xs={12}
                             className={classNames(
-                                classes.mainArea,
+                                classes.appView,
                                 classes.hiddenOverflow
                             )}
                         >
-                            {/*
-                             * Conditionally render either the TweetInput or the ThreadViewer
-                             * when in mobile view.
-                             */}
-                            {editing ? (
-                                <TweetInput
-                                    tweetText={tweetText}
-                                    handleTweetInput={updateTweet}
-                                    thread={thread}
-                                    viewThreadHandler={toggleEditing}
-                                />
-                            ) : (
-                                <ThreadViewer
-                                    user={user}
-                                    thread={thread}
-                                    editThreadHandler={toggleEditing}
-                                />
-                            )}
+                            <Hidden mdUp>
+                                <Grid
+                                    item
+                                    xs={12}
+                                    className={classNames(
+                                        classes.mainArea,
+                                        classes.hiddenOverflow
+                                    )}
+                                >
+                                    {/*
+                                     * Conditionally render either the TweetInput or the ThreadViewer
+                                     * when in mobile view.
+                                     */}
+                                    {editing ? tweetInput : threadViewer}
+                                </Grid>
+                            </Hidden>
+
+                            <Hidden smDown>
+                                <Grid
+                                    item
+                                    xs={7}
+                                    className={classNames(
+                                        classes.mainArea,
+                                        classes.hiddenOverflow
+                                    )}
+                                >
+                                    {tweetInput}
+                                </Grid>
+
+                                <Grid
+                                    item
+                                    xs={5}
+                                    className={classNames(
+                                        classes.mainArea,
+                                        classes.hiddenOverflow
+                                    )}
+                                >
+                                    {threadViewer}
+                                </Grid>
+                            </Hidden>
                         </Grid>
                     </Grid>
                 </Container>
