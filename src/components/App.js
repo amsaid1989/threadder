@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { makeStyles, ThemeProvider } from "@material-ui/core/styles";
 import classNames from "classnames";
-import theme from "./threadder-theme";
+import theme from "../threadder-theme";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import Container from "@material-ui/core/Container";
 import Grid from "@material-ui/core/Grid";
 import Hidden from "@material-ui/core/Hidden";
-import Header from "./components/Header";
-import TweetInput from "./components/TweetInput";
-import ThreadViewer from "./components/ThreadViewer";
+import Header from "./Header";
+import TweetInput from "./TweetInput";
+import ThreadViewer from "./ThreadViewer";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -55,12 +55,7 @@ export default function App(props) {
         handle: "untitled_user",
     });
     const [tweetText, setTweetText] = useState("");
-    const [thread, setThread] = useState([
-        "ECaEXFulJOjlpfaAftISGCgmJJGjtSpNSytrMuzXJJQYWlsMfQMgMWMBhPlDvcWCZddmOdwqDvbitTifJAuCmSYsaBGlPQMmSvHeFVcAMILUcXDxXupBAMyXhMkpYUfYESWefiuXgPWKHKxePSMyGTBYHVfJvjnTCegTXkAlaQYJTyUPOPELJNRtJCeYAXeiZHnqnrdejjBVIIaDjiKcNyPZEFzVjgOboOngFucjsYEJwuLzaCjnBMExPLxqiIQuZeJNiaVGHNvROVRcWONBpdUI",
-        "ECaEXFulJOjlpfaAftISGCgmJJGjtSpNSytrMuzXJJQYWlsMfQMgMWMBhPlDvcWCZddmOdwqDvbitTifJAuCmSYsaBGlPQMmSvHeFVcAMILUcXDxXupBAMyXhMkpYUfYESWefiuXgPWKHKxePSMyGTBYHVfJvjnTCegTXkAlaQYJTyUPOPELJNRtJCeYAXeiZHnqnrdejjBVIIaDjiKcNyPZEFzVjgOboOngFucjsYEJwuLzaCjnBMExPLxqiIQuZeJNiaVGHNvROVRcWONBpdUI",
-        "ECaEXFulJOjlpfaAftISGCgmJJGjtSpNSytrMuzXJJQYWlsMfQMgMWMBhPlDvcWCZddmOdwqDvbitTifJAuCmSYsaBGlPQMmSvHeFVcAMILUcXDxXupBAMyXhMkpYUfYESWefiuXgPWKHKxePSMyGTBYHVfJvjnTCegTXkAlaQYJTyUPOPELJNRtJCeYAXeiZHnqnrdejjBVIIaDjiKcNyPZEFzVjgOboOngFucjsYEJwuLzaCjnBMExPLxqiIQuZeJNiaVGHNvROVRcWONBpdUI",
-        "ECaEXFulJOjlpfaAftISGCgmJJGjtSpNSytrMuzXJJQYWlsMfQMgMWMBhPlDvcWCZddmOdwqDvbitTifJAuCmSYsaBGlPQMmSvHeFVcAMILUcXDxXupBAMyXhMkpYUfYESWefiuXgPWKHKxePSMyGTBYHVfJvjnTCegTXkAlaQYJTyUPOPELJNRtJCeYAXeiZHnqnrdejjBVIIaDjiKcNyPZEFzVjgOboOngFucjsYEJwuLzaCjnBMExPLxqiIQuZeJNiaVGHNvROVRcWONBpdUI",
-    ]);
+    const [thread, setThread] = useState([]);
     const [editing, setEditing] = useState(true);
     /* END APP STATE */
 
