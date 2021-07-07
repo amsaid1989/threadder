@@ -9,6 +9,7 @@ import Hidden from "@material-ui/core/Hidden";
 import Header from "./Header";
 import TweetInput from "./TweetInput";
 import ThreadViewer from "./ThreadViewer";
+import splitTweet from "../controllers/tweetSplitter";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -66,7 +67,15 @@ export default function App(props) {
          * types the tweet they want to split into a thread.
          */
 
-        setTweetText(event.target.value);
+        const text = event.target.value;
+
+        setTweetText(text);
+
+        if (text.length === 0) {
+            setThread([]);
+        } else {
+            setThread(splitTweet(event.target.value));
+        }
     };
     const toggleEditing = () => {
         /*

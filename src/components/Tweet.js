@@ -138,7 +138,7 @@ export default function Tweet(props) {
              * as well as the text of the tweet.
              */}
             <Grid
-                Container
+                container
                 className={classNames(
                     classes.expandingFlexItem,
                     classes.verticalGrid,
