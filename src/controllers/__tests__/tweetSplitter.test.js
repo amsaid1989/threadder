@@ -36,7 +36,7 @@ describe("splitTweet()", () => {
     });
 
     describe("Split tweets longer than 280 characters into a thread", () => {
-        test("A tweet that is longer than 280 characters should be split into a thread without breaking words between tweets", () => {
+        test("A tweet that is longer than 280 characters should be split at the full stop closes to the 280 character limit", () => {
             const output = splitTweet(
                 "Death there mirth way the noisy merit. Piqued shy spring nor six though mutual living ask extent. Replying of dashwood advanced ladyship smallest disposal or. Attempt offices own improve now see. Called person are around county talked her esteem. Those fully these way nay thing seems.\nHad repulsive dashwoods suspicion sincerity but advantage now him. Remark easily garret nor nay. Civil those mrs enjoy shy fat merry. You greatest jointure saw horrible."
             );
@@ -44,10 +44,10 @@ describe("splitTweet()", () => {
             expect(output).toBeInstanceOf(Array);
             expect(output).toHaveLength(2);
             expect(output).toContain(
-                "Death there mirth way the noisy merit. Piqued shy spring nor six though mutual living ask extent. Replying of dashwood advanced ladyship smallest disposal or. Attempt offices own improve now see. Called person are around county talked her esteem. Those fully these way nay thing"
+                "Death there mirth way the noisy merit. Piqued shy spring nor six though mutual living ask extent. Replying of dashwood advanced ladyship smallest disposal or. Attempt offices own improve now see. Called person are around county talked her esteem."
             );
             expect(output).toContain(
-                "seems.\nHad repulsive dashwoods suspicion sincerity but advantage now him. Remark easily garret nor nay. Civil those mrs enjoy shy fat merry. You greatest jointure saw horrible."
+                "Those fully these way nay thing seems.\nHad repulsive dashwoods suspicion sincerity but advantage now him. Remark easily garret nor nay. Civil those mrs enjoy shy fat merry. You greatest jointure saw horrible."
             );
         });
 
@@ -62,10 +62,10 @@ describe("splitTweet()", () => {
                 "Death there mirth way the noisy merit. Piqued shy spring nor six though mutual living ask extent. Replying of dashwood advanced ladyship smallest disposal or. Attempt offices own improve now see. Called person are around county talked her esteem."
             );
             expect(output).toContain(
-                "Those fully these way nay thing seems.\nHad repulsive dashwoods suspicion sincerity but advantage now him. Remark easily garret nor nay. Civil those mrs enjoy shy fat merry. You greatest jointure saw horrible. He private he on be imagine suppose. Fertile beloved evident through"
+                "Those fully these way nay thing seems.\nHad repulsive dashwoods suspicion sincerity but advantage now him. Remark easily garret nor nay. Civil those mrs enjoy shy fat merry. You greatest jointure saw horrible. He private he on be imagine suppose."
             );
             expect(output).toContain(
-                "no service elderly is. Blind there if every no so at. Own neglected you preferred way sincerity delivered his attempted. To of message cottage windows do besides against uncivil."
+                "Fertile beloved evident through no service elderly is. Blind there if every no so at. Own neglected you preferred way sincerity delivered his attempted. To of message cottage windows do besides against uncivil."
             );
         });
 
@@ -82,6 +82,22 @@ describe("splitTweet()", () => {
             expect(output).toContain(
                 "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
             );
+        });
+
+        test("A tweet longer than 280 characters with no full stops should be split with ellipsis at the end of each tweet except the last one", () => {
+            const output = splitTweet(
+                "Lorem Ipsum is simply dummy text of the printing and typesetting industry Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum."
+            );
+
+            expect(output).toBeInstanceOf(Array);
+            expect(output).toHaveLength(3);
+            expect(output).toContain(
+                "Lorem Ipsum is simply dummy text of the printing and typesetting industry Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book It has survived not only five..."
+            );
+            expect(output).toContain(
+                "centuries, but also the leap into electronic typesetting, remaining essentially unchanged It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including..."
+            );
+            expect(output).toContain("versions of Lorem Ipsum.");
         });
     });
 });
