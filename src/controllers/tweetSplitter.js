@@ -1,5 +1,10 @@
 const TWEET_LENGTH = 280;
 
+// TODO: The full algorithm needs thorough testing to see how it works on
+// different inputs. One problematic area seems to be at the function that
+// breaks the tweet at full stops, when lastIndex and lastSplitIndex are
+// both equal to 0
+
 export default function splitTweet(thread) {
     const cleanedThread = thread.trim();
 
@@ -35,9 +40,26 @@ export default function splitTweet(thread) {
         return fullSentencesSplit;
     }
 
+    // Third, split any tweets longer than 280 at newline characters
+    const returnSplit = fullSentencesSplit
+        .map((tweet) => {
+            if (tweet.length <= TWEET_LENGTH) {
+                return tweet;
+            }
+
+            return breakTweetAtNewlines(tweet);
+        })
+        .flat();
+
+    // Return early if all tweets are shorter than the maximum allowed
+    // tweet length
+    if (returnSplit.every((tweet) => tweet.length <= TWEET_LENGTH)) {
+        return returnSplit;
+    }
+
     // Last, split any tweets that are still longer than the maximum
     // allowed tweet length
-    const output = fullSentencesSplit
+    const output = returnSplit
         .map((tweet) => {
             if (tweet.length <= TWEET_LENGTH) {
                 return tweet;
@@ -48,6 +70,54 @@ export default function splitTweet(thread) {
         .flat();
 
     return output;
+}
+
+function breakTweetAtFullstops(tweet) {
+    /*
+     * A function that takes a tweet that is longer than 280 characters
+     * and splits it into an array of tweets at full sentences, where the
+     * length each tweet is less than or equal to 280
+     */
+
+    const matches = Array.from(tweet.matchAll(/\.\s/g));
+
+    let lastSplitIndex = 0;
+    let lastIndex = 0;
+
+    let splitTweets = [];
+
+    for (const match of matches) {
+        if (match.index - lastSplitIndex > TWEET_LENGTH) {
+            if (
+                lastIndex > lastSplitIndex &&
+                lastIndex - lastSplitIndex >= TWEET_LENGTH / 2
+            ) {
+                splitTweets.push(
+                    tweet.slice(lastSplitIndex, lastIndex + 1).trim()
+                );
+
+                lastSplitIndex = lastIndex + 1;
+            } else {
+                splitTweets.push(
+                    tweet.slice(lastSplitIndex, match.index + 1).trim()
+                );
+
+                lastSplitIndex = match.index + 1;
+            }
+        }
+
+        lastIndex = match.index;
+    }
+
+    if (lastIndex > lastSplitIndex) {
+        splitTweets.push(tweet.slice(lastSplitIndex).trim());
+    }
+
+    return splitTweets;
+}
+
+function breakTweetAtNewlines(tweet) {
+    return tweet.split("\n").filter((tweet) => tweet !== "");
 }
 
 function breakVeryLongWord(word) {
@@ -82,53 +152,6 @@ function breakVeryLongWord(word) {
         }
 
         splitTweets.push(outWord);
-    }
-
-    return splitTweets;
-}
-
-// TODO: The function still needs improvement. It doesn't work really well
-// if there are extra characters after the full stop, like a closing paren
-// or bracket.
-function breakTweetAtFullstops(tweet) {
-    /*
-     * A function that takes a tweet that is longer than 280 characters
-     * and splits it into an array of tweets at full sentences, where the
-     * length each tweet is less than or equal to 280
-     */
-
-    const matches = Array.from(tweet.matchAll(/\./g));
-
-    let lastSplitIndex = 0;
-    let lastIndex = 0;
-
-    let splitTweets = [];
-
-    for (const match of matches) {
-        if (match.index - lastSplitIndex > TWEET_LENGTH) {
-            if (
-                lastIndex > lastSplitIndex &&
-                lastIndex - lastSplitIndex >= TWEET_LENGTH / 2
-            ) {
-                splitTweets.push(
-                    tweet.slice(lastSplitIndex, lastIndex + 1).trim()
-                );
-
-                lastSplitIndex = lastIndex + 1;
-            } else {
-                splitTweets.push(
-                    tweet.slice(lastSplitIndex, match.index + 1).trim()
-                );
-
-                lastSplitIndex = match.index + 1;
-            }
-        }
-
-        lastIndex = match.index;
-    }
-
-    if (lastIndex > lastSplitIndex) {
-        splitTweets.push(tweet.slice(lastSplitIndex).trim());
     }
 
     return splitTweets;
