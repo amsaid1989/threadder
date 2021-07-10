@@ -1,0 +1,20 @@
+{
+  "files": {
+    "main.css": "/threadder/static/css/main.d94212a3.chunk.css",
+    "main.js": "/threadder/static/js/main.bd91eb6b.chunk.js",
+    "main.js.map": "/threadder/static/js/main.bd91eb6b.chunk.js.map",
+    "runtime-main.js": "/threadder/static/js/runtime-main.73fd8acf.js",
+    "runtime-main.js.map": "/threadder/static/js/runtime-main.73fd8acf.js.map",
+    "static/js/2.759bfb32.chunk.js": "/threadder/static/js/2.759bfb32.chunk.js",
+    "static/js/2.759bfb32.chunk.js.map": "/threadder/static/js/2.759bfb32.chunk.js.map",
+    "index.html": "/threadder/index.html",
+    "static/css/main.d94212a3.chunk.css.map": "/threadder/static/css/main.d94212a3.chunk.css.map",
+    "static/js/2.759bfb32.chunk.js.LICENSE.txt": "/threadder/static/js/2.759bfb32.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.73fd8acf.js",
+    "static/js/2.759bfb32.chunk.js",
+    "static/css/main.d94212a3.chunk.css",
+    "static/js/main.bd91eb6b.chunk.js"
+  ]
+}
