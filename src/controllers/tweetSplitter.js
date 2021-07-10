@@ -1,4 +1,5 @@
-const TWEET_LENGTH = 280;
+import { TWEET_LENGTH } from "../utils/generalConstants";
+import breakTextAtFullSentences from "../utils/fullSentenceHandler";
 
 // TODO: The full algorithm needs thorough testing to see how it works on
 // different inputs. One problematic area seems to be at the function that
@@ -30,7 +31,7 @@ export default function splitTweet(thread) {
                 return tweet;
             }
 
-            return breakTweetAtFullstops(tweet);
+            return breakTextAtFullSentences(tweet).map((tweet) => tweet.trim());
         })
         .flat();
 
@@ -70,50 +71,6 @@ export default function splitTweet(thread) {
         .flat();
 
     return output;
-}
-
-function breakTweetAtFullstops(tweet) {
-    /*
-     * A function that takes a tweet that is longer than 280 characters
-     * and splits it into an array of tweets at full sentences, where the
-     * length each tweet is less than or equal to 280
-     */
-
-    const matches = Array.from(tweet.matchAll(/\.\s/g));
-
-    let lastSplitIndex = 0;
-    let lastIndex = 0;
-
-    let splitTweets = [];
-
-    for (const match of matches) {
-        if (match.index - lastSplitIndex > TWEET_LENGTH) {
-            if (
-                lastIndex > lastSplitIndex &&
-                lastIndex - lastSplitIndex >= TWEET_LENGTH / 2
-            ) {
-                splitTweets.push(
-                    tweet.slice(lastSplitIndex, lastIndex + 1).trim()
-                );
-
-                lastSplitIndex = lastIndex + 1;
-            } else {
-                splitTweets.push(
-                    tweet.slice(lastSplitIndex, match.index + 1).trim()
-                );
-
-                lastSplitIndex = match.index + 1;
-            }
-        }
-
-        lastIndex = match.index;
-    }
-
-    if (lastIndex > lastSplitIndex) {
-        splitTweets.push(tweet.slice(lastSplitIndex).trim());
-    }
-
-    return splitTweets;
 }
 
 function breakTweetAtNewlines(tweet) {
