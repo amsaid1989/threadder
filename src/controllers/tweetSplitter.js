@@ -1,11 +1,6 @@
 import { TWEET_LENGTH } from "../utils/generalConstants";
 import breakTextAtFullSentences from "../utils/fullSentenceHandler";
 
-// TODO: The full algorithm needs thorough testing to see how it works on
-// different inputs. One problematic area seems to be at the function that
-// breaks the tweet at full stops, when lastIndex and lastSplitIndex are
-// both equal to 0
-
 export default function splitTweet(thread) {
     const cleanedThread = thread.trim();
 
@@ -14,14 +9,17 @@ export default function splitTweet(thread) {
     }
 
     // First, take care of user-defined splits
-    const userDefinedSplits = cleanedThread.split("(---)");
+    const userDefinedSplits = cleanedThread
+        .split("(---)")
+        .flat()
+        .map((tweet) => tweet.trim());
 
     // Return early if all tweets are shorter than the maximum allowed
     // tweet length
     if (userDefinedSplits.every((tweet) => tweet.length <= TWEET_LENGTH)) {
         // Make sure all tweets don't have any extra spaces at the start
         // or at the end
-        return userDefinedSplits.map((tweet) => tweet.trim());
+        return userDefinedSplits;
     }
 
     // Second, split the tweet at full sentences that fit within a tweet
@@ -31,9 +29,10 @@ export default function splitTweet(thread) {
                 return tweet;
             }
 
-            return breakTextAtFullSentences(tweet).map((tweet) => tweet.trim());
+            return breakTextAtFullSentences(tweet);
         })
-        .flat();
+        .flat()
+        .map((tweet) => tweet.trim());
 
     // Return early if all tweets are shorter than the maximum allowed
     // tweet length
@@ -41,26 +40,9 @@ export default function splitTweet(thread) {
         return fullSentencesSplit;
     }
 
-    // Third, split any tweets longer than 280 at newline characters
-    const returnSplit = fullSentencesSplit
-        .map((tweet) => {
-            if (tweet.length <= TWEET_LENGTH) {
-                return tweet;
-            }
-
-            return breakTweetAtNewlines(tweet);
-        })
-        .flat();
-
-    // Return early if all tweets are shorter than the maximum allowed
-    // tweet length
-    if (returnSplit.every((tweet) => tweet.length <= TWEET_LENGTH)) {
-        return returnSplit;
-    }
-
     // Last, split any tweets that are still longer than the maximum
     // allowed tweet length
-    const output = returnSplit
+    const output = fullSentencesSplit
         .map((tweet) => {
             if (tweet.length <= TWEET_LENGTH) {
                 return tweet;
@@ -68,13 +50,10 @@ export default function splitTweet(thread) {
 
             return breakLongTweet(tweet);
         })
-        .flat();
+        .flat()
+        .map((tweet) => tweet.trim());
 
     return output;
-}
-
-function breakTweetAtNewlines(tweet) {
-    return tweet.split("\n").filter((tweet) => tweet !== "");
 }
 
 function breakVeryLongWord(word) {

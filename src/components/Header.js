@@ -34,7 +34,12 @@ export default function Header(props) {
 
     // The sign in StyledButton component
     const logInBtn = (
-        <StyledButton variant="contained" color="secondary" onClick={logIn}>
+        <StyledButton
+            variant="contained"
+            color="secondary"
+            onClick={logIn}
+            disabled // Disable the button until login is implemented
+        >
             Log in
         </StyledButton>
     );

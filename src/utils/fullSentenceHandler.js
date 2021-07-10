@@ -5,8 +5,32 @@ export default function breakTextAtFullSentences(text) {
      * The main function of the module which will be used by
      * the tweet splitter module.
      */
+    const fullSentenceSplit = combineSentencesIntoTweets(splitAtFullstops(text))
+        .flat()
+        .map((tweet) => tweet.trim());
 
-    return combineSentencesIntoTweets(splitAtFullstops(text));
+    // Return early if all tweets are shorter than the maximum
+    // character count allowed for tweets
+    if (fullSentenceSplit.every((tweet) => tweet.length <= TWEET_LENGTH)) {
+        return fullSentenceSplit;
+    }
+
+    // If there are tweets that are still longer than the maxmium
+    // allowed character count, attempt to split these tweets
+    // at newline characters, since a newline character is
+    // usually an indication of a new sentence
+    const newlineSplit = fullSentenceSplit
+        .map((tweet) => {
+            if (tweet.length <= TWEET_LENGTH) {
+                return tweet;
+            }
+
+            return breakTweetAtNewlines(tweet);
+        })
+        .flat()
+        .map((tweet) => tweet.trim());
+
+    return newlineSplit;
 }
 
 function trimTopAndTailSpaces(text) {
@@ -56,10 +80,10 @@ function combineSentencesIntoTweets(sentenceArray) {
      * Takes an array of sentences and iterates over it combining
      * the sentences into tweets that aren't longer than 280
      * characters. However, if one of the sentences is shorter than
-     * 140, it will add the following sentence to it even if their
-     * combined length is longer than 280. This is to avoid having
-     * very short tweets unnecessarily. If the user wants to have
-     * short tweets, they can force a split.
+     * 70 (1/4th of 280), it will add the following sentence to it
+     * even if the combined length is longer than 280. This is to
+     * avoid having very short tweets unnecessarily. If the user
+     * wants to have short tweets, they can force a split.
      *
      * Any tweets longer than 280 will be handled by further functions
      * that will eventually split them to fit the maximum character
@@ -87,7 +111,7 @@ function combineSentencesIntoTweets(sentenceArray) {
         const curSentence = sentenceArray[i];
 
         if (
-            lastSentence.length <= TWEET_LENGTH / 2 ||
+            lastSentence.length <= TWEET_LENGTH / 4 ||
             lastSentence.length + curSentence.length <= TWEET_LENGTH
         ) {
             lastSentence += ` ${curSentence}`;
@@ -101,8 +125,19 @@ function combineSentencesIntoTweets(sentenceArray) {
     return outArray;
 }
 
+function breakTweetAtNewlines(tweet) {
+    /*
+     * Takes a text and splits it into an array of tweets at the
+     * newline characters
+     */
+
+    return tweet.split("\n").filter((tweet) => tweet !== "");
+}
+
+// Module functions exported mainly for testing purposes
 export const fsHandler = {
     trimTopAndTailSpaces,
     splitAtFullstops,
     combineSentencesIntoTweets,
+    breakTweetAtNewlines,
 };

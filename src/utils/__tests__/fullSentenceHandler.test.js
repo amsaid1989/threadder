@@ -94,4 +94,23 @@ describe("fullSentenceHandler", () => {
             );
         });
     });
+
+    describe("breakTweetAtNewlines", () => {
+        test("should break a text with newline characters into an array of tweets at the newlines", () => {
+            const testCase1 = fsHandler.breakTweetAtNewlines(
+                "The remaining ¥28 million Ufotable owed was in consumption taxes, which stem from the company’s retail cafe/restaurant businesses in Tokyo and Osaka.\n\nIn a statement on Ufotable’s website, the company says that it has fully repaid the amount it owed the government.\n\nThe news of Kondo and Ufotable’s tax evasion comes amid growing awareness of how little rank-and-file workers earn in the anime industry. This story suggests that even though many artists don’t earn a living wage working in Japan’s animation industry, there’s plenty of excess money floating around studios at the management level."
+            );
+            expect(testCase1).toBeInstanceOf(Array);
+            expect(testCase1).toHaveLength(3);
+            expect(testCase1).toContain(
+                "The remaining ¥28 million Ufotable owed was in consumption taxes, which stem from the company’s retail cafe/restaurant businesses in Tokyo and Osaka."
+            );
+            expect(testCase1).toContain(
+                "In a statement on Ufotable’s website, the company says that it has fully repaid the amount it owed the government."
+            );
+            expect(testCase1).toContain(
+                "The news of Kondo and Ufotable’s tax evasion comes amid growing awareness of how little rank-and-file workers earn in the anime industry. This story suggests that even though many artists don’t earn a living wage working in Japan’s animation industry, there’s plenty of excess money floating around studios at the management level."
+            );
+        });
+    });
 });
