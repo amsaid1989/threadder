@@ -1,15 +1,15 @@
 import { useState } from "react";
 import { makeStyles, ThemeProvider } from "@material-ui/core/styles";
 import classNames from "classnames";
-import darkTheme from "../themes/threadder-dark-theme";
+import darkTheme from "./themes/threadder-dark-theme";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import Container from "@material-ui/core/Container";
 import Grid from "@material-ui/core/Grid";
 import Hidden from "@material-ui/core/Hidden";
-import Header from "./Header";
-import TweetInput from "./TweetInput";
-import ThreadViewer from "./ThreadViewer";
-import splitTweet from "../controllers/tweetSplitter";
+import Header from "./components/Header";
+import TweetInput from "./components/TweetInput";
+import ThreadViewer from "./components/ThreadViewer";
+import splitTweet from "./controllers/tweetSplitter";
 
 const useStyles = makeStyles((theme) => ({
     root: {
