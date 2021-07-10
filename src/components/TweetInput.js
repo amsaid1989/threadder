@@ -6,6 +6,14 @@ import Typography from "@material-ui/core/Typography";
 import StyledButton from "./StyledButton";
 import Hidden from "@material-ui/core/Hidden";
 
+/*
+ * The styles and implementation of the tweet input component.
+ * This component is where the user will input the text they
+ * want to split into a thread of tweets.
+ * It also shows some stats about the character count of the
+ * text and how many tweets are generated from it.
+ */
+
 const useStyles = makeStyles((theme) => ({
     root: {
         flexFlow: "column nowrap",
@@ -109,7 +117,8 @@ export default function TweetInput(props) {
                 </Container>
             </Grid>
 
-            {/* GRID ITEM 03: View Thread Button */}
+            {/* GRID ITEM 03: View Thread Button
+            This button is hidden in the desktop view of the app */}
             <Hidden mdUp>
                 <Grid item xs={12} className={classes.fixedSizeFlexItem}>
                     <StyledButton

@@ -6,6 +6,14 @@ import StyledButton from "./StyledButton";
 import Hidden from "@material-ui/core/Hidden";
 import Tweet from "./Tweet";
 
+/*
+ * The styles and implementation of the Thread Viewer component.
+ * This component will show the tweets passed from the App
+ * component using the Tweet component.
+ * It also has the Publish Thread button which activates when
+ * there are at least 1 tweet added.
+ */
+
 const useStyles = makeStyles((theme) => ({
     root: {
         flexFlow: "column nowrap",
@@ -45,7 +53,6 @@ const useStyles = makeStyles((theme) => ({
 export default function TweetInput(props) {
     const classes = useStyles();
 
-    // TODO: Implement the Tweet component that will be used here
     const tweets = props.thread.map((tweet, index, arr) => (
         <Tweet
             key={tweet}
@@ -87,7 +94,8 @@ export default function TweetInput(props) {
                 </Container>
             </Grid>
 
-            {/* GRID ITEM 02: Button Bar */}
+            {/* GRID ITEM 02: Button Bar
+            The Edit Thread button will be hidden in the desktop view of the app */}
             <Grid item xs={12} className={classes.fixedSizeFlexItem}>
                 <Container
                     className={classNames(
