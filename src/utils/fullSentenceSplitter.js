@@ -5,9 +5,9 @@ export default function breakTextAtFullSentences(text) {
      * The main function of the module which will be used by
      * the tweet splitter module.
      */
-    const fullSentenceSplit = combineSentencesIntoTweets(splitAtFullstops(text))
-        .flat()
-        .map((tweet) => tweet.trim());
+    const fullSentenceSplit = combineSentencesIntoTweets(
+        splitAtFullstops(text)
+    );
 
     // Return early if all tweets are shorter than the maximum
     // character count allowed for tweets
@@ -106,7 +106,8 @@ function combineSentencesIntoTweets(sentenceArray) {
         }
 
         // Get the last sentence that was added to the output array
-        let lastSentence = outArray[outArray.length - 1];
+        const lastSentenceIndex = outArray.length - 1;
+        let lastSentence = outArray[lastSentenceIndex];
 
         const curSentence = sentenceArray[i];
 
@@ -114,9 +115,15 @@ function combineSentencesIntoTweets(sentenceArray) {
             lastSentence.length <= TWEET_LENGTH / 4 ||
             lastSentence.length + curSentence.length <= TWEET_LENGTH
         ) {
-            lastSentence += ` ${curSentence}`;
+            // If the current sentence starts with a newline character
+            // we just concatenate it to the last sentence. Otherwise,
+            // we add a space after the last sentence then concatenate
+            // the current one
+            lastSentence += curSentence.startsWith("\n")
+                ? curSentence
+                : ` ${curSentence}`;
 
-            outArray[outArray.length - 1] = lastSentence;
+            outArray[lastSentenceIndex] = lastSentence;
         } else {
             outArray.push(sentenceArray[i]);
         }
@@ -135,7 +142,7 @@ function breakTweetAtNewlines(tweet) {
 }
 
 // Module functions exported mainly for testing purposes
-export const fsHandler = {
+export const fsSplitter = {
     trimTopAndTailSpaces,
     splitAtFullstops,
     combineSentencesIntoTweets,

@@ -19,7 +19,7 @@ const useStyles = makeStyles((theme) => ({
          * multiple tweets displayed. If the tweet is the last one, or the
          * only one, in the thread, then no margin is added.
          */
-        marginBottom: "1em",
+        marginBottom: "1.5em",
         flexFlow: "row nowrap",
         "&:last-child": {
             marginBottom: 0,
@@ -39,7 +39,7 @@ const useStyles = makeStyles((theme) => ({
         alignItems: "center",
     },
     threadLineContainer: {
-        padding: "0.4em",
+        padding: 0,
     },
     threadLine: {
         /*
@@ -54,7 +54,7 @@ const useStyles = makeStyles((theme) => ({
         width: "2px",
 
         // Add the marginBottom value from the root to the height
-        height: "calc(100% + 1em)",
+        height: "calc(100% + 1.5em)",
 
         backgroundColor: theme.palette.background.default,
     },
