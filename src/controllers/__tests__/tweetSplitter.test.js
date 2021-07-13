@@ -88,7 +88,7 @@ describe("tweetSplitter", () => {
             );
 
             expect(testCase4).toBeInstanceOf(Array);
-            expect(testCase4).toHaveLength(4);
+            expect(testCase4).toHaveLength(3);
             expect(testCase4).toContain(
                 "Yet the cost of animation production is such that local money alone can’t necessarily cover..."
             );
@@ -96,9 +96,8 @@ describe("tweetSplitter", () => {
                 "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..."
             );
             expect(testCase4).toContain(
-                "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..."
+                "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa full feature."
             );
-            expect(testCase4).toContain("full feature.");
         });
     });
 });

@@ -46,6 +46,45 @@ describe("midSentenceSplitter", () => {
         });
     });
 
+    describe("recombineShortTweets", () => {
+        test("should combine any consecutive tweets in an array if their combined length is less than or equal to the maximum tweet length", () => {
+            const testCase = msSplitter.recombineShortTweets([
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua Mi in nulla posuere sollicitudin aliquam ultrices...",
+                "kjshdfkjherfkjherkjfhekrjfhekrjhfkejhrkfjherkfjherfkjhwerkjfhwekjfhwweferkjhferkjiuehrfkjerwefwefwefwfqwdsqwqwdkjshdfkjherfkjherkjfhekrjfhekrjhfkejhrkfjherkfjherfkjhwerkjfhwekjfhwweferkjhferkjiuehrfkjerwefwefwefwfqwdsqwqwdjshdfkjherfkjherkjfhekrjfhekrjhfkejhrkfjherkfjherfkjhwe...",
+                "rkjfhwdwqedq",
+                "Consequat ac felis donec et odio pellentesque diam volutpat commodo Sed libero enim sed faucibus turpis",
+            ]);
+
+            expect(testCase).toBeInstanceOf(Array);
+            expect(testCase).toHaveLength(3);
+            expect(testCase).toContain(
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua Mi in nulla posuere sollicitudin aliquam ultrices..."
+            );
+            expect(testCase).toContain(
+                "kjshdfkjherfkjherkjfhekrjfhekrjhfkejhrkfjherkfjherfkjhwerkjfhwekjfhwweferkjhferkjiuehrfkjerwefwefwefwfqwdsqwqwdkjshdfkjherfkjherkjfhekrjfhekrjhfkejhrkfjherkfjherfkjhwerkjfhwekjfhwweferkjhferkjiuehrfkjerwefwefwefwfqwdsqwqwdjshdfkjherfkjherkjfhekrjfhekrjhfkejhrkfjherkfjherfkjhwe..."
+            );
+            expect(testCase).toContain(
+                "rkjfhwdwqedq Consequat ac felis donec et odio pellentesque diam volutpat commodo Sed libero enim sed faucibus turpis"
+            );
+        });
+
+        test("shouldn't combine any consecutive tweets if their combined length is longer than the maximum tweet length", () => {
+            const testCase = msSplitter.recombineShortTweets([
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua Mi in nulla posuere sollicitudin aliquam ultrices Consequat ac felis donec et odio pellentesque diam volutpat commodo Sed libero enim sed faucibus turpis...",
+                "in In pellentesque massa placerat duis ultricies.",
+            ]);
+
+            expect(testCase).toBeInstanceOf(Array);
+            expect(testCase).toHaveLength(2);
+            expect(testCase).toContain(
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua Mi in nulla posuere sollicitudin aliquam ultrices Consequat ac felis donec et odio pellentesque diam volutpat commodo Sed libero enim sed faucibus turpis..."
+            );
+            expect(testCase).toContain(
+                "in In pellentesque massa placerat duis ultricies."
+            );
+        });
+    });
+
     describe("breakLongSentence", () => {
         test("shouldn't break the sentence as long as its length is less than maximum tweet length", () => {
             const testCase = breakLongSentence("This is the first tweet");
@@ -74,15 +113,14 @@ describe("midSentenceSplitter", () => {
             );
 
             expect(testCase).toBeInstanceOf(Array);
-            expect(testCase).toHaveLength(4);
+            expect(testCase).toHaveLength(3);
             expect(testCase).toContain("This is my sentence...");
             expect(testCase).toContain(
                 "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..."
             );
             expect(testCase).toContain(
-                "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..."
+                "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa and it ends here"
             );
-            expect(testCase).toContain("and it ends here");
         });
     });
 });

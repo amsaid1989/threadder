@@ -70,11 +70,19 @@ export default function breakLongSentence(sentence) {
         splitTweets.push(currentTweet);
     }
 
-    // Remove ellipsis from the last tweet
+    // Remove ellipsis from the last tweet. The reason we remove the ellipsis
+    // from the last tweet is that this function acts on complete sentences,
+    // so the last tweet in the array is not part of any sentence that comes
+    // after it. It is part of the thread, but it is not part of a broken
+    // sentence, so it doesn't need the ellipsis
     const lastTweetIndex = splitTweets.length - 1;
     splitTweets[lastTweetIndex] = removeEllipsisFromTweet(
         splitTweets[lastTweetIndex]
     );
+
+    // Go over the tweets array and combine any two or more split tweets that
+    // could actually fit in one single tweet
+    splitTweets = recombineShortTweets(splitTweets);
 
     return splitTweets;
 }
@@ -128,8 +136,48 @@ function removeEllipsisFromTweet(tweet) {
     }
 }
 
+function recombineShortTweets(threadArray) {
+    /*
+     * Takes an array of tweets and iterates over it combining any
+     * consecutive tweets that can fit in a single tweet
+     */
+
+    // The output array
+    let combinedTweets = [];
+
+    for (let i = 0; i < threadArray.length; i++) {
+        const curTweet = threadArray[i];
+
+        if (i === 0) {
+            combinedTweets.push(curTweet);
+
+            continue;
+        }
+
+        const lastTweetIndex = combinedTweets.length - 1;
+
+        // Get the last tweet making sure to clean it from ellipsis
+        // if it has them at the end to prepare it for the following
+        // tweet to be added if they can fit together in a single tweet
+        const lastTweet = removeEllipsisFromTweet(
+            combinedTweets[lastTweetIndex]
+        );
+
+        if (lastTweet.length + curTweet.length + 1 <= TWEET_LENGTH) {
+            // Replace the last tweet with the combination of last tweet
+            // and the current tweet
+            combinedTweets[lastTweetIndex] = `${lastTweet} ${curTweet}`;
+        } else {
+            combinedTweets.push(curTweet);
+        }
+    }
+
+    return combinedTweets;
+}
+
 // Module functions exported mainly for testing purposes
 export const msSplitter = {
     breakVeryLongWord,
     removeEllipsisFromTweet,
+    recombineShortTweets,
 };
