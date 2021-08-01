@@ -112,7 +112,10 @@ export default function Tweet(props) {
                 )}
             >
                 <Grid item>
-                    <Avatar />
+                    <Avatar
+                        src={props.user.profileImage}
+                        alt={`${props.user.name} profile picture`}
+                    />
                 </Grid>
 
                 {/* Render a line that connects all tweets similar to
@@ -166,7 +169,7 @@ export default function Tweet(props) {
                             classes.userHandle
                         )}
                     >
-                        {`@${props.user.handle}`}
+                        {`@${props.user.screenName}`}
                     </span>
                 </Grid>
 

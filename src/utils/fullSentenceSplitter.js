@@ -18,17 +18,22 @@ export default function breakTextAtFullSentences(text) {
     // If there are tweets that are still longer than the maxmium
     // allowed character count, attempt to split these tweets
     // at newline characters, since a newline character is
-    // usually an indication of a new sentence
-    const newlineSplit = fullSentenceSplit
-        .map((tweet) => {
-            if (tweet.length <= TWEET_LENGTH) {
-                return tweet;
-            }
+    // usually an indication of a new sentence. However, make sure
+    // that sentences aren't split into extermely short tweets
+    // by recombining them
+    const newlineSplit = combineSentencesIntoTweets(
+        fullSentenceSplit
+            .map((tweet) => {
+                if (tweet.length <= TWEET_LENGTH) {
+                    return tweet;
+                }
 
-            return breakTweetAtNewlines(tweet);
-        })
-        .flat()
-        .map((tweet) => tweet.trim());
+                return breakTweetAtNewlines(tweet);
+            })
+            .flat()
+            .map((tweet) => tweet.trim()),
+        "\n"
+    );
 
     return newlineSplit;
 }
@@ -64,8 +69,8 @@ function splitAtFullstops(text) {
      * would end up keeping its full stop.
      */
 
-    const removeFullstopPattern = /\.(?=\s?[\w\n]+)/g;
-    const removeSpacePattern = /(?<=\.)\s/g;
+    const removeFullstopPattern = /(?<=\d*[a-zA-Z]\w+)\.(?=\s*\d*[a-zA-Z]\w*\n?)/g;
+    const removeSpacePattern = /(?<=\d*[a-zA-Z]\w+\.)\s/g;
 
     return text
         .split(removeFullstopPattern)
@@ -75,7 +80,7 @@ function splitAtFullstops(text) {
         .map((sentence) => trimTopAndTailSpaces(sentence));
 }
 
-function combineSentencesIntoTweets(sentenceArray) {
+function combineSentencesIntoTweets(sentenceArray, combiningCharacter = " ") {
     /*
      * Takes an array of sentences and iterates over it combining
      * the sentences into tweets that aren't longer than 280
@@ -88,6 +93,11 @@ function combineSentencesIntoTweets(sentenceArray) {
      * Any tweets longer than 280 will be handled by further functions
      * that will eventually split them to fit the maximum character
      * count on Twitter.
+     *
+     * It uses a combiningCharacter parameter to allow the user to
+     * define if they want a non-space character added between the
+     * two sentences. If the combiningCharacter isn't specified, it
+     * will just use a space.
      */
 
     // Return early if sentenceArray is empty
@@ -117,11 +127,11 @@ function combineSentencesIntoTweets(sentenceArray) {
         ) {
             // If the current sentence starts with a newline character
             // we just concatenate it to the last sentence. Otherwise,
-            // we add a space after the last sentence then concatenate
-            // the current one
+            // we add the combiningCharacter after the last sentence
+            // then concatenate the current one
             lastSentence += curSentence.startsWith("\n")
                 ? curSentence
-                : ` ${curSentence}`;
+                : `${combiningCharacter}${curSentence}`;
 
             outArray[lastSentenceIndex] = lastSentence;
         } else {

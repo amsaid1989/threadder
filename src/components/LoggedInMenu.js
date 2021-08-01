@@ -1,10 +1,13 @@
 import { useState } from "react";
+import { useCookies } from "react-cookie";
 import { makeStyles } from "@material-ui/core/styles";
 import Box from "@material-ui/core/Box";
 import IconButton from "@material-ui/core/IconButton";
 import Avatar from "@material-ui/core/Avatar";
 import StyledMenu from "./StyledMenu";
 import MenuItem from "@material-ui/core/MenuItem";
+import axios from "axios";
+import { SERVER_URL } from "../utils/generalConstants";
 
 /*
  * The styles and implementation of the menu component that
@@ -33,6 +36,8 @@ export default function LoggedInMenu(props) {
     const [anchorEl, setAnchorEl] = useState(null);
     /* END COMPONENT STATE */
 
+    const [cookie] = useCookies(["user"]);
+
     /* EVENT HANDLERS */
     const handleAvatarClick = (event) => {
         /*
@@ -53,22 +58,36 @@ export default function LoggedInMenu(props) {
     const redirectToTwitter = () => {
         closeMenu();
 
-        // TODO: Implement
-        console.log("redirecting to twitter");
+        const screenName = cookie.user.screenName;
+
+        document.location.href = `https://twitter.com/${screenName}`;
     };
 
     const logOut = () => {
         closeMenu();
 
-        // TODO: Implement
-        console.log("logging out");
+        axios({
+            url: "/logout",
+            method: "get",
+            baseURL: SERVER_URL,
+            withCredentials: true,
+        })
+            .then(() => {
+                props.setLoggedOutState();
+            })
+            .catch((err) => {
+                console.log(err);
+            });
     };
     /* END EVENT HANDLERS */
 
     return (
         <Box>
             <IconButton size="small" onClick={handleAvatarClick}>
-                <Avatar />
+                <Avatar
+                    src={props.user.profileImage}
+                    alt={`${props.user.name} profile picture`}
+                />
             </IconButton>
 
             <StyledMenu

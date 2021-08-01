@@ -4,6 +4,8 @@ import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import StyledButton from "./StyledButton";
 import LoggedInMenu from "./LoggedInMenu";
+import axios from "axios";
+import { SERVER_URL } from "../utils/generalConstants";
 
 /*
  * The styles and implementation of the app Header component.
@@ -28,18 +30,22 @@ export default function Header(props) {
     const classes = useStyles();
 
     const logIn = () => {
-        // TODO: Implement
-        console.log("logging in");
+        axios({
+            url: "/request_token",
+            method: "get",
+            baseURL: SERVER_URL,
+            withCredentials: true,
+        })
+            .then((response) => {
+                // Redirect to the authentication URL
+                document.location.href = response.data.redirect;
+            })
+            .catch((err) => console.log(err));
     };
 
     // The sign in StyledButton component
     const logInBtn = (
-        <StyledButton
-            variant="contained"
-            color="secondary"
-            onClick={logIn}
-            disabled // Disable the button until login is implemented
-        >
+        <StyledButton variant="contained" color="secondary" onClick={logIn}>
             Log in
         </StyledButton>
     );
@@ -50,7 +56,14 @@ export default function Header(props) {
                 <Typography variant="h5" className={classes.title}>
                     Threadder
                 </Typography>
-                {props.loggedIn ? <LoggedInMenu /> : logInBtn}
+                {props.loggedIn ? (
+                    <LoggedInMenu
+                        user={props.user}
+                        setLoggedOutState={props.setLoggedOutState}
+                    />
+                ) : (
+                    logInBtn
+                )}
             </Toolbar>
         </AppBar>
     );

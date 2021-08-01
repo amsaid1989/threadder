@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useCookies } from "react-cookie";
 import { makeStyles, ThemeProvider } from "@material-ui/core/styles";
 import classNames from "classnames";
 import darkTheme from "./themes/threadder-dark-theme";
@@ -10,6 +11,7 @@ import Header from "./components/Header";
 import TweetInput from "./components/TweetInput";
 import ThreadViewer from "./components/ThreadViewer";
 import splitTweet from "./controllers/tweetSplitter";
+import { isNotEmpty, containsAllKeys } from "./utils/objectIntegrityCheckers";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -49,11 +51,16 @@ const useStyles = makeStyles((theme) => ({
 export default function App(props) {
     const classes = useStyles();
 
+    /* COOKIES */
+    const [cookie] = useCookies(["user"]);
+    /* END COOKIES */
+
     /* APP STATE */
     const [loggedIn, setLoggedIn] = useState(false);
     const [user, setUser] = useState({
         name: "Untitled User",
-        handle: "untitled_user",
+        screenName: "untitled_user",
+        profileImage: "",
     });
     const [tweetText, setTweetText] = useState("");
     const [thread, setThread] = useState([]);
@@ -86,7 +93,32 @@ export default function App(props) {
 
         setEditing(!editing);
     };
+    const finaliseLogout = () => {
+        setLoggedIn(false);
+        setUser({
+            name: "Untitled User",
+            screenName: "untitled_user",
+            profileImage: "",
+        });
+    };
     /* END EVENT HANDLERS */
+
+    /* SIDE EFFECTS */
+    // On page load, check for the user cookie and if it exists,
+    // extract the user details and set the loggedIn state
+    useEffect(() => {
+        if (
+            cookie.user !== undefined &&
+            isNotEmpty(cookie.user) &&
+            containsAllKeys(cookie.user, ["name", "screenName", "profileImage"])
+        ) {
+            setLoggedIn(true);
+            setUser(cookie.user);
+        } else {
+            finaliseLogout();
+        }
+    }, [cookie.user]);
+    /* END SIDE EFFECTS */
 
     return (
         <ThemeProvider theme={darkTheme}>
@@ -97,10 +129,16 @@ export default function App(props) {
                         spacing={3}
                         className={classes.gridContainer}
                     >
+                        {/* App Header grid item */}
                         <Grid item xs={12} className={classes.appHeader}>
-                            <Header loggedIn={loggedIn} />
+                            <Header
+                                user={user}
+                                loggedIn={loggedIn}
+                                setLoggedOutState={finaliseLogout}
+                            />
                         </Grid>
 
+                        {/* Grid item that holds both TweetInput and the ThreadViewer */}
                         <Grid
                             item
                             xs={12}
@@ -109,6 +147,7 @@ export default function App(props) {
                                 classes.hiddenOverflow
                             )}
                         >
+                            {/* TweetInput item which gets hidden in mobile views if not editing */}
                             <Hidden smDown={!editing}>
                                 <Grid
                                     item
@@ -128,6 +167,7 @@ export default function App(props) {
                                 </Grid>
                             </Hidden>
 
+                            {/* ThreadViewer item which gets hidden in mobile views when editing */}
                             <Hidden smDown={editing}>
                                 <Grid
                                     item
