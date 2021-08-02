@@ -12,6 +12,8 @@ import TweetInput from "./components/TweetInput";
 import ThreadViewer from "./components/ThreadViewer";
 import splitTweet from "./controllers/tweetSplitter";
 import { isNotEmpty, containsAllKeys } from "./utils/objectIntegrityCheckers";
+import axios from "axios";
+import { SERVER_URL } from "./utils/generalConstants";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -101,6 +103,17 @@ export default function App(props) {
             profileImage: "",
         });
     };
+    const sendTweet = () => {
+        axios({
+            url: "/publish_thread",
+            method: "post",
+            baseURL: SERVER_URL,
+            withCredentials: true,
+            data: {
+                tweets: thread,
+            },
+        });
+    };
     /* END EVENT HANDLERS */
 
     /* SIDE EFFECTS */
@@ -182,6 +195,7 @@ export default function App(props) {
                                         user={user}
                                         thread={thread}
                                         editThreadHandler={toggleEditing}
+                                        publishHandler={sendTweet}
                                     />
                                 </Grid>
                             </Hidden>

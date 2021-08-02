@@ -117,6 +117,7 @@ export default function TweetInput(props) {
                     <StyledButton
                         variant="contained"
                         color="secondary"
+                        onClick={props.publishHandler}
                         disabled={!tweets.length > 0}
                         fullWidth
                     >
