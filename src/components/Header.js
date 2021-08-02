@@ -19,6 +19,7 @@ import { SERVER_URL } from "../utils/generalConstants";
 
 const useStyles = makeStyles((theme) => ({
     toolbar: {
+        height: "1em",
         padding: "1em 1.5em",
     },
     title: {
