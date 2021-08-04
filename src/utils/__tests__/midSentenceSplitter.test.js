@@ -27,12 +27,10 @@ describe("midSentenceSplitter", () => {
 
             expect(testCase).toBeInstanceOf(Array);
             expect(testCase).toHaveLength(2);
-            expect(testCase).toContain(
-                "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..."
-            );
-            expect(testCase).toContain(
-                "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..."
-            );
+            expect(testCase).toEqual([
+                "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...",
+                "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...",
+            ]);
         });
 
         test("shouldn't break a single long word as long as it is shorter than the maximum tweet length", () => {
@@ -57,15 +55,11 @@ describe("midSentenceSplitter", () => {
 
             expect(testCase).toBeInstanceOf(Array);
             expect(testCase).toHaveLength(3);
-            expect(testCase).toContain(
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua Mi in nulla posuere sollicitudin aliquam ultrices..."
-            );
-            expect(testCase).toContain(
-                "kjshdfkjherfkjherkjfhekrjfhekrjhfkejhrkfjherkfjherfkjhwerkjfhwekjfhwweferkjhferkjiuehrfkjerwefwefwefwfqwdsqwqwdkjshdfkjherfkjherkjfhekrjfhekrjhfkejhrkfjherkfjherfkjhwerkjfhwekjfhwweferkjhferkjiuehrfkjerwefwefwefwfqwdsqwqwdjshdfkjherfkjherkjfhekrjfhekrjhfkejhrkfjherkfjherfkjhwe..."
-            );
-            expect(testCase).toContain(
-                "rkjfhwdwqedq Consequat ac felis donec et odio pellentesque diam volutpat commodo Sed libero enim sed faucibus turpis"
-            );
+            expect(testCase).toEqual([
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua Mi in nulla posuere sollicitudin aliquam ultrices...",
+                "kjshdfkjherfkjherkjfhekrjfhekrjhfkejhrkfjherkfjherfkjhwerkjfhwekjfhwweferkjhferkjiuehrfkjerwefwefwefwfqwdsqwqwdkjshdfkjherfkjherkjfhekrjfhekrjhfkejhrkfjherkfjherfkjhwerkjfhwekjfhwweferkjhferkjiuehrfkjerwefwefwefwfqwdsqwqwdjshdfkjherfkjherkjfhekrjfhekrjhfkejhrkfjherkfjherfkjhwe...",
+                "rkjfhwdwqedq Consequat ac felis donec et odio pellentesque diam volutpat commodo Sed libero enim sed faucibus turpis",
+            ]);
         });
 
         test("shouldn't combine any consecutive tweets if their combined length is longer than the maximum tweet length", () => {
@@ -76,12 +70,10 @@ describe("midSentenceSplitter", () => {
 
             expect(testCase).toBeInstanceOf(Array);
             expect(testCase).toHaveLength(2);
-            expect(testCase).toContain(
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua Mi in nulla posuere sollicitudin aliquam ultrices Consequat ac felis donec et odio pellentesque diam volutpat commodo Sed libero enim sed faucibus turpis..."
-            );
-            expect(testCase).toContain(
-                "in In pellentesque massa placerat duis ultricies."
-            );
+            expect(testCase).toEqual([
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua Mi in nulla posuere sollicitudin aliquam ultrices Consequat ac felis donec et odio pellentesque diam volutpat commodo Sed libero enim sed faucibus turpis...",
+                "in In pellentesque massa placerat duis ultricies.",
+            ]);
         });
     });
 
@@ -99,12 +91,10 @@ describe("midSentenceSplitter", () => {
 
             expect(testCase).toBeInstanceOf(Array);
             expect(testCase).toHaveLength(2);
-            expect(testCase).toContain(
-                "The five features will be presented on Saturday, July 10 as part of the market’s Animation Days segment. They vary widely in themes, tone, and technique, ranging from 2d to cgi, and road-trip comedies to wartime dramas. Yet the stories are all steeped in the country of their..."
-            );
-            expect(testCase).toContain(
-                "origin, depicting the history, politics, traditions, and landscapes of Chile."
-            );
+            expect(testCase).toEqual([
+                "The five features will be presented on Saturday, July 10 as part of the market’s Animation Days segment. They vary widely in themes, tone, and technique, ranging from 2d to cgi, and road-trip comedies to wartime dramas. Yet the stories are all steeped in the country of their...",
+                "origin, depicting the history, politics, traditions, and landscapes of Chile.",
+            ]);
         });
 
         test("should break long sentences that contain long words handling those long words in the process", () => {
@@ -114,13 +104,11 @@ describe("midSentenceSplitter", () => {
 
             expect(testCase).toBeInstanceOf(Array);
             expect(testCase).toHaveLength(3);
-            expect(testCase).toContain("This is my sentence...");
-            expect(testCase).toContain(
-                "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..."
-            );
-            expect(testCase).toContain(
-                "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa and it ends here"
-            );
+            expect(testCase).toEqual([
+                "This is my sentence...",
+                "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...",
+                "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa and it ends here",
+            ]);
         });
     });
 });

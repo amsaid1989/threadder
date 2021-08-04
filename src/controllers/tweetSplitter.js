@@ -8,7 +8,8 @@ export default function splitTweet(thread) {
     // First, take care of user-defined splits
     const userDefinedSplits = cleanedThread
         .split("(---)")
-        .map((tweet) => tweet.trim());
+        .map((tweet) => tweet.trim())
+        .filter((tweet) => tweet !== "");
 
     // Return early if all tweets are shorter than the maximum allowed
     // tweet length

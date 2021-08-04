@@ -6,8 +6,7 @@ import IconButton from "@material-ui/core/IconButton";
 import Avatar from "@material-ui/core/Avatar";
 import StyledMenu from "./StyledMenu";
 import MenuItem from "@material-ui/core/MenuItem";
-import axios from "axios";
-import { SERVER_URL } from "../utils/generalConstants";
+import { logout } from "../controllers/APICalls";
 
 /*
  * The styles and implementation of the menu component that
@@ -56,6 +55,12 @@ export default function LoggedInMenu(props) {
     };
 
     const redirectToTwitter = () => {
+        /*
+         * Handles the click event for the Go to Twitter menu
+         * item, redirecting the logged-in user to their Twitter
+         * profile
+         */
+
         closeMenu();
 
         const screenName = cookie.user.screenName;
@@ -63,15 +68,14 @@ export default function LoggedInMenu(props) {
         document.location.href = `https://twitter.com/${screenName}`;
     };
 
-    const logOut = () => {
+    const logOutHandler = () => {
+        /*
+         * Handles the click event for the Logout menu item
+         */
+
         closeMenu();
 
-        axios({
-            url: "/logout",
-            method: "get",
-            baseURL: SERVER_URL,
-            withCredentials: true,
-        })
+        logout()
             .then(() => {
                 props.setLoggedOutState();
             })
@@ -108,7 +112,7 @@ export default function LoggedInMenu(props) {
                     Go to Twitter
                 </MenuItem>
 
-                <MenuItem className={classes.menuItem} onClick={logOut}>
+                <MenuItem className={classes.menuItem} onClick={logOutHandler}>
                     Log out
                 </MenuItem>
             </StyledMenu>

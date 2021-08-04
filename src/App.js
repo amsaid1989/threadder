@@ -12,8 +12,11 @@ import TweetInput from "./components/TweetInput";
 import ThreadViewer from "./components/ThreadViewer";
 import splitTweet from "./controllers/tweetSplitter";
 import { isNotEmpty, containsAllKeys } from "./utils/objectIntegrityCheckers";
-import axios from "axios";
-import { SERVER_URL } from "./utils/generalConstants";
+import { login, publishThread } from "./controllers/APICalls";
+import {
+    setSesssionStorageItem,
+    getSesssionStorageItem,
+} from "./controllers/sessionStorageWrappers";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -64,7 +67,9 @@ export default function App(props) {
         screenName: "untitled_user",
         profileImage: "",
     });
-    const [tweetText, setTweetText] = useState("");
+    const [tweetText, setTweetText] = useState(
+        getSesssionStorageItem("tweetText") || ""
+    );
     const [thread, setThread] = useState([]);
     const [editing, setEditing] = useState(true);
     /* END APP STATE */
@@ -79,12 +84,6 @@ export default function App(props) {
         const text = event.target.value;
 
         setTweetText(text);
-
-        if (text.length === 0) {
-            setThread([]);
-        } else {
-            setThread(splitTweet(event.target.value));
-        }
     };
     const toggleEditing = () => {
         /*
@@ -96,6 +95,15 @@ export default function App(props) {
         setEditing(!editing);
     };
     const finaliseLogout = () => {
+        /*
+         * A convenience function that resets the loggedIn
+         * and user states to their initial values. It is
+         * used when the page reloads after the login process
+         * when the login fails. It is also passed to the
+         * Header component to be used as part of the click
+         * handler of the logout menu item.
+         */
+
         setLoggedIn(false);
         setUser({
             name: "Untitled User",
@@ -103,20 +111,44 @@ export default function App(props) {
             profileImage: "",
         });
     };
-    const sendTweet = () => {
-        axios({
-            url: "/publish_thread",
-            method: "post",
-            baseURL: SERVER_URL,
-            withCredentials: true,
-            data: {
-                tweets: thread,
-            },
-        });
+    const publishThreadHandler = () => {
+        /*
+         * Handles the click event of the Publish Thread button.
+         * If the user is already logged in, then it just publishes
+         * the thread. Otherwise, it sets the toPublish item in
+         * the sessionStorage to true and initiates the login
+         * process.
+         *
+         * The toPublish sessionStorage item determines whether
+         * the application needs to publish a thread when the
+         * page reloads or not.
+         */
+
+        if (loggedIn) {
+            publishThread(thread);
+        } else {
+            setSesssionStorageItem("toPublish", true);
+
+            login();
+        }
     };
     /* END EVENT HANDLERS */
 
     /* SIDE EFFECTS */
+    // On page load, check if the toPublish sessionStorage item
+    // is true. This would indicate that the page load happened
+    // because the user clicked the Publish Thread button without
+    // being logged in, which initiated the login process.
+    useEffect(() => {
+        if (getSesssionStorageItem("toPublish")) {
+            setSesssionStorageItem("toPublish", false);
+
+            const storedThread = getSesssionStorageItem("thread");
+
+            publishThread(storedThread);
+        }
+    });
+
     // On page load, check for the user cookie and if it exists,
     // extract the user details and set the loggedIn state
     useEffect(() => {
@@ -131,6 +163,25 @@ export default function App(props) {
             finaliseLogout();
         }
     }, [cookie.user]);
+
+    // When the tweetText is updated, update the thread state
+    // and store the tweetText in the sessionStorage to ensure
+    // it persists across reloads
+    useEffect(() => {
+        if (tweetText.length === 0) {
+            setThread([]);
+        } else {
+            setThread(splitTweet(tweetText));
+        }
+
+        setSesssionStorageItem("tweetText", tweetText);
+    }, [tweetText]);
+
+    // When the thread is updated, store it in the sessionStorage
+    // to ensure it persists across reloads
+    useEffect(() => {
+        setSesssionStorageItem("thread", thread);
+    }, [thread]);
     /* END SIDE EFFECTS */
 
     return (
@@ -195,7 +246,7 @@ export default function App(props) {
                                         user={user}
                                         thread={thread}
                                         editThreadHandler={toggleEditing}
-                                        publishHandler={sendTweet}
+                                        publishHandler={publishThreadHandler}
                                     />
                                 </Grid>
                             </Hidden>

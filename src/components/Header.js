@@ -4,8 +4,7 @@ import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import StyledButton from "./StyledButton";
 import LoggedInMenu from "./LoggedInMenu";
-import axios from "axios";
-import { SERVER_URL } from "../utils/generalConstants";
+import { login } from "../controllers/APICalls";
 
 /*
  * The styles and implementation of the app Header component.
@@ -30,23 +29,9 @@ const useStyles = makeStyles((theme) => ({
 export default function Header(props) {
     const classes = useStyles();
 
-    const logIn = () => {
-        axios({
-            url: "/request_token",
-            method: "get",
-            baseURL: SERVER_URL,
-            withCredentials: true,
-        })
-            .then((response) => {
-                // Redirect to the authentication URL
-                document.location.href = response.data.redirect;
-            })
-            .catch((err) => console.log(err));
-    };
-
     // The sign in StyledButton component
     const logInBtn = (
-        <StyledButton variant="contained" color="secondary" onClick={logIn}>
+        <StyledButton variant="contained" color="secondary" onClick={login}>
             Log in
         </StyledButton>
     );
