@@ -5832,6 +5832,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"dotenv@npm:^10.0.0":
+  version: 10.0.0
+  resolution: "dotenv@npm:10.0.0"
+  checksum: 9c45712e213de63bdb646b8e5344749b7566e25a67bbd3f03711d54e40eff10066c1f23eff0081d0949fda7c8efcc6e9e8bf18d0f023a8274f55f5d5f97bb6db
+  languageName: node
+  linkType: hard
+
 "duplexer@npm:^0.1.1":
   version: 0.1.2
   resolution: "duplexer@npm:0.1.2"
@@ -14482,6 +14489,7 @@ resolve@1.18.1:
     "@testing-library/user-event": ^12.1.10
     axios: ^0.21.1
     classnames: ^2.3.1
+    dotenv: ^10.0.0
     eslint-config-react-app: ^6.0.0
     gh-pages: ^3.2.3
     react: ^17.0.2

@@ -1,4 +1,5 @@
 import axios from "axios";
+import { SERVER } from "../utils/generalConstants";
 
 function sendAPIRequest(url, method, data = undefined) {
     /*
@@ -10,6 +11,7 @@ function sendAPIRequest(url, method, data = undefined) {
         url: url,
         method: method,
         withCredentials: true,
+        baseURL: SERVER,
         data: data ? data : {},
     });
 }
