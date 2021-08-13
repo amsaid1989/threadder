@@ -135,6 +135,9 @@ export default function App(props) {
     /* END EVENT HANDLERS */
 
     /* SIDE EFFECTS */
+    useEffect(() => {
+        console.log(document.cookie);
+    });
     // On page load, check if the toPublish sessionStorage item
     // is true. This would indicate that the page load happened
     // because the user clicked the Publish Thread button without
