@@ -16,7 +16,6 @@ import { login, publishThread } from "./controllers/APICalls";
 import {
     setSesssionStorageItem,
     getSesssionStorageItem,
-    removeSessionStorageItem,
 } from "./controllers/sessionStorageWrappers";
 
 const useStyles = makeStyles((theme) => ({
@@ -58,12 +57,16 @@ export default function App(props) {
     const classes = useStyles();
 
     /* APP STATE */
-    const [loggedIn, setLoggedIn] = useState(false);
-    const [user, setUser] = useState({
-        name: "Untitled User",
-        screenName: "untitled_user",
-        profileImage: "",
-    });
+    const [loggedIn, setLoggedIn] = useState(
+        getSesssionStorageItem("loggedIn") || false
+    );
+    const [user, setUser] = useState(
+        getSesssionStorageItem("user") || {
+            name: "Untitled User",
+            screenName: "untitled_user",
+            profileImage: "",
+        }
+    );
     const [tweetText, setTweetText] = useState(
         getSesssionStorageItem("tweetText") || ""
     );
@@ -107,7 +110,6 @@ export default function App(props) {
             screenName: "untitled_user",
             profileImage: "",
         });
-        removeSessionStorageItem("user");
     };
     const publishThreadHandler = () => {
         /*
@@ -153,11 +155,8 @@ export default function App(props) {
 
             const userObj = queryString.parse(document.location.search);
             setUser(userObj);
-            setSesssionStorageItem("user", userObj);
 
             document.location.search = "";
-        } else {
-            finaliseLogout();
         }
     }, []);
 
@@ -171,10 +170,16 @@ export default function App(props) {
         ) {
             setLoggedIn(true);
             setUser(getSesssionStorageItem("user"));
-        } else {
-            finaliseLogout();
         }
     }, []);
+
+    useEffect(() => {
+        setSesssionStorageItem("loggedIn", loggedIn);
+    }, [loggedIn]);
+
+    useEffect(() => {
+        setSesssionStorageItem("user", user);
+    }, [user]);
 
     // When the tweetText is updated, update the thread state
     // and store the tweetText in the sessionStorage to ensure
