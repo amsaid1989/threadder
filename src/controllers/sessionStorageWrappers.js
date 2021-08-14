@@ -15,3 +15,7 @@ export function getSesssionStorageItem(itemName) {
      */
     return JSON.parse(sessionStorage.getItem(itemName));
 }
+
+export function removeSessionStorageItem(itemName) {
+    sessionStorage.removeItem(itemName);
+}

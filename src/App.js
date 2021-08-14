@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useCookies } from "react-cookie";
 import { makeStyles, ThemeProvider } from "@material-ui/core/styles";
+import queryString from "query-string";
 import classNames from "classnames";
 import darkTheme from "./themes/threadder-dark-theme";
 import CssBaseline from "@material-ui/core/CssBaseline";
@@ -16,6 +16,7 @@ import { login, publishThread } from "./controllers/APICalls";
 import {
     setSesssionStorageItem,
     getSesssionStorageItem,
+    removeSessionStorageItem,
 } from "./controllers/sessionStorageWrappers";
 
 const useStyles = makeStyles((theme) => ({
@@ -55,10 +56,6 @@ const useStyles = makeStyles((theme) => ({
 
 export default function App(props) {
     const classes = useStyles();
-
-    /* COOKIES */
-    const [cookie] = useCookies(["user"]);
-    /* END COOKIES */
 
     /* APP STATE */
     const [loggedIn, setLoggedIn] = useState(false);
@@ -110,6 +107,7 @@ export default function App(props) {
             screenName: "untitled_user",
             profileImage: "",
         });
+        removeSessionStorageItem("user");
     };
     const publishThreadHandler = () => {
         /*
@@ -135,9 +133,6 @@ export default function App(props) {
     /* END EVENT HANDLERS */
 
     /* SIDE EFFECTS */
-    useEffect(() => {
-        console.log(document.cookie);
-    });
     // On page load, check if the toPublish sessionStorage item
     // is true. This would indicate that the page load happened
     // because the user clicked the Publish Thread button without
@@ -152,20 +147,34 @@ export default function App(props) {
         }
     });
 
-    // On page load, check for the user cookie and if it exists,
-    // extract the user details and set the loggedIn state
     useEffect(() => {
-        if (
-            cookie.user !== undefined &&
-            isNotEmpty(cookie.user) &&
-            containsAllKeys(cookie.user, ["name", "screenName", "profileImage"])
-        ) {
+        if (document.location.search !== "") {
             setLoggedIn(true);
-            setUser(cookie.user);
+
+            const userObj = queryString.parse(document.location.search);
+            setUser(userObj);
+            setSesssionStorageItem("user", userObj);
+
+            document.location.search = "";
         } else {
             finaliseLogout();
         }
-    }, [cookie.user]);
+    }, []);
+
+    useEffect(() => {
+        const userObj = getSesssionStorageItem("user");
+
+        if (
+            userObj !== null &&
+            isNotEmpty(userObj) &&
+            containsAllKeys(userObj, ["name", "screenName", "profileImage"])
+        ) {
+            setLoggedIn(true);
+            setUser(getSesssionStorageItem("user"));
+        } else {
+            finaliseLogout();
+        }
+    }, []);
 
     // When the tweetText is updated, update the thread state
     // and store the tweetText in the sessionStorage to ensure
