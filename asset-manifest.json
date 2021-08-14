@@ -1,8 +1,8 @@
 {
   "files": {
     "main.css": "/threadder/static/css/main.d94212a3.chunk.css",
-    "main.js": "/threadder/static/js/main.4198a6a2.chunk.js",
-    "main.js.map": "/threadder/static/js/main.4198a6a2.chunk.js.map",
+    "main.js": "/threadder/static/js/main.a3fc2b19.chunk.js",
+    "main.js.map": "/threadder/static/js/main.a3fc2b19.chunk.js.map",
     "runtime-main.js": "/threadder/static/js/runtime-main.73fd8acf.js",
     "runtime-main.js.map": "/threadder/static/js/runtime-main.73fd8acf.js.map",
     "static/js/2.6a73f5e0.chunk.js": "/threadder/static/js/2.6a73f5e0.chunk.js",
@@ -15,6 +15,6 @@
     "static/js/runtime-main.73fd8acf.js",
     "static/js/2.6a73f5e0.chunk.js",
     "static/css/main.d94212a3.chunk.css",
-    "static/js/main.4198a6a2.chunk.js"
+    "static/js/main.a3fc2b19.chunk.js"
   ]
 }
