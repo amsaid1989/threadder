@@ -17,6 +17,11 @@ import {
     setSesssionStorageItem,
     getSesssionStorageItem,
 } from "./controllers/sessionStorageWrappers";
+import {
+    UNTITLED_NAME,
+    UNTITLED_SCREEN_NAME,
+    UNTITLED_PROFILE_IMAGE,
+} from "./utils/generalConstants";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -56,16 +61,18 @@ const useStyles = makeStyles((theme) => ({
 export default function App(props) {
     const classes = useStyles();
 
+    const untitledUser = Object.freeze({
+        name: UNTITLED_NAME,
+        screenName: UNTITLED_SCREEN_NAME,
+        profileImage: UNTITLED_PROFILE_IMAGE,
+    });
+
     /* APP STATE */
     const [loggedIn, setLoggedIn] = useState(
         getSesssionStorageItem("loggedIn") || false
     );
     const [user, setUser] = useState(
-        getSesssionStorageItem("user") || {
-            name: "Untitled User",
-            screenName: "untitled_user",
-            profileImage: "",
-        }
+        getSesssionStorageItem("user") || untitledUser
     );
     const [tweetText, setTweetText] = useState(
         getSesssionStorageItem("tweetText") || ""
@@ -105,11 +112,7 @@ export default function App(props) {
          */
 
         setLoggedIn(false);
-        setUser({
-            name: "Untitled User",
-            screenName: "untitled_user",
-            profileImage: "",
-        });
+        setUser(untitledUser);
     };
     const publishThreadHandler = () => {
         /*
@@ -166,7 +169,8 @@ export default function App(props) {
         if (
             userObj !== null &&
             isNotEmpty(userObj) &&
-            containsAllKeys(userObj, ["name", "screenName", "profileImage"])
+            containsAllKeys(userObj, ["name", "screenName", "profileImage"]) &&
+            userObj.name !== UNTITLED_NAME
         ) {
             setLoggedIn(true);
             setUser(getSesssionStorageItem("user"));
