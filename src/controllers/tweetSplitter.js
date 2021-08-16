@@ -1,6 +1,7 @@
 import { TWEET_LENGTH } from "../utils/generalConstants";
 import breakTextAtFullSentences from "../utils/fullSentenceSplitter";
 import breakLongSentence from "../utils/midSentenceSplitter";
+import detectAndSplitURLs, { isURL } from "../utils/urlSplitter";
 
 export default function splitTweet(thread) {
     const cleanedThread = thread.trim();
@@ -17,10 +18,17 @@ export default function splitTweet(thread) {
         return userDefinedSplits;
     }
 
-    // Second, split the tweet at full sentences that fit within a tweet
-    const fullSentencesSplit = userDefinedSplits
+    // Second, split any URLs in the text, so they are protected from
+    // being broken down
+    const splitAtURLs = userDefinedSplits
+        .map((tweet) => detectAndSplitURLs(tweet))
+        .flat()
+        .map((tweet) => tweet.trim());
+
+    // Third, split the tweet at full sentences that fit within a tweet
+    const fullSentencesSplit = splitAtURLs
         .map((tweet) => {
-            if (tweet.length <= TWEET_LENGTH) {
+            if (tweet.length <= TWEET_LENGTH || isURL(tweet)) {
                 return tweet;
             }
 
