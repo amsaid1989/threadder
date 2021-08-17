@@ -39,6 +39,24 @@ export default function breakTextAtFullSentences(text) {
     return newlineSplit;
 }
 
+export function splitAtLastFullstopOrNewline(text) {
+    /*
+        Splits the last sentence of a text made of multiple
+        sentences split by fullstops or newlines.
+
+        Returns the split text as an array.
+    */
+
+    // Get the index of the last fullstop and the last newline
+    // then use the greatest of them as the index of where to
+    // split the text
+    const lastFullstop = text.lastIndexOf(".");
+    const lastNewline = text.lastIndexOf("\n");
+    const splitIndex = lastFullstop > lastNewline ? lastFullstop : lastNewline;
+
+    return [text.slice(0, splitIndex), text.slice(splitIndex)];
+}
+
 function trimTopAndTailSpaces(text) {
     /*
         Removes any spaces or tab characters from the start and end of
@@ -70,7 +88,8 @@ function splitAtFullstops(text) {
         would end up keeping its full stop.
     */
 
-    const removeFullstopPattern = /(?<=\d*[a-zA-Z]\w+)\.(?=\s*\d*[a-zA-Z]\w*\n?)/g;
+    const removeFullstopPattern =
+        /(?<=\d*[a-zA-Z]\w+)\.(?=\s*\d*[a-zA-Z]\w*\n?)/g;
     const removeSpacePattern = /(?<=\d*[a-zA-Z]\w+\.)\s/g;
 
     return text
