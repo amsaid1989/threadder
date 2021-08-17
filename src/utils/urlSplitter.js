@@ -1,5 +1,8 @@
 import { TWEET_LENGTH } from "./generalConstants";
-import { splitAtLastFullstopOrNewline } from "./fullSentenceSplitter";
+import {
+    splitAtFirstFullstopOrNewline,
+    splitAtLastFullstopOrNewline,
+} from "./fullSentenceSplitter";
 
 const urlPattern =
     /((?:https?:\/\/)?(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&//=]*))/;
@@ -51,29 +54,66 @@ export function rejoinURLsIntoTweets(threadArray) {
 
         if (
             i === 0 ||
-            (i > 0 && !isURL(currentTweet) && !isURL(lastTweetAdded))
+            (i > 0 &&
+                !isURL(currentTweet) &&
+                !isURL(lastTweetAdded) &&
+                lastTweetAdded.length > TWEET_LENGTH / 4)
         ) {
             out.push(currentTweet);
             continue;
-        } else if (
-            isURL(currentTweet) &&
-            lastTweetAdded.length + currentTweet.length > TWEET_LENGTH
-        ) {
-            out = [
-                ...out.slice(0, lastIndex),
-                ...splitAtLastFullstopOrNewline(lastTweetAdded),
-            ];
-        }
+        } else if (isURL(currentTweet)) {
+            if (lastTweetAdded.length + currentTweet.length > TWEET_LENGTH) {
+                out = [
+                    ...out.slice(0, lastIndex),
+                    ...splitAtLastFullstopOrNewline(lastTweetAdded),
+                ];
+            }
 
-        const nonWordCharacterPattern = /\W/;
-        const firstCharacterInCurrentTweet = currentTweet[0];
+            const lastTweet = out[out.length - 1];
+            const lastCharacterInPrevTweet = lastTweet[lastTweet.length - 1];
+            const firstCharacterInCurrentTweet = currentTweet[0];
 
-        if (nonWordCharacterPattern.test(firstCharacterInCurrentTweet)) {
-            out[out.length - 1] += currentTweet;
+            if (
+                characterIsNonWord(lastCharacterInPrevTweet) ||
+                characterIsNonWord(firstCharacterInCurrentTweet)
+            ) {
+                out[out.length - 1] += currentTweet;
+            } else {
+                out[out.length - 1] += ` ${currentTweet}`;
+            }
         } else {
-            out[out.length - 1] += ` ${currentTweet}`;
+            let first = currentTweet;
+            let rest = [];
+
+            if (lastTweetAdded.length + currentTweet.length > TWEET_LENGTH) {
+                const splitCurrentTweet =
+                    splitAtFirstFullstopOrNewline(currentTweet);
+                first = splitCurrentTweet[0];
+                rest = splitCurrentTweet.slice(1);
+            }
+
+            const lastTweet = out[out.length - 1];
+            const lastCharacterInPrevTweet = lastTweet[lastTweet.length - 1];
+            const firstCharacterInCurrentTweet = first[0];
+
+            if (
+                characterIsNonWord(lastCharacterInPrevTweet) ||
+                characterIsNonWord(firstCharacterInCurrentTweet)
+            ) {
+                out[out.length - 1] += first;
+            } else {
+                out[out.length - 1] += ` ${first}`;
+            }
+
+            out = [...out, ...rest];
         }
     }
 
     return out;
+}
+
+function characterIsNonWord(char) {
+    const testPattern = /\W/;
+
+    return testPattern.test(char);
 }

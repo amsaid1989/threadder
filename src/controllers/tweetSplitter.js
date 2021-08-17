@@ -1,6 +1,9 @@
 import { TWEET_LENGTH } from "../utils/generalConstants";
 import breakTextAtFullSentences from "../utils/fullSentenceSplitter";
-import breakLongSentence from "../utils/midSentenceSplitter";
+import {
+    breakLongSentence,
+    recombineShortTweets,
+} from "../utils/midSentenceSplitter";
 import {
     isURL,
     detectAndSplitURLs,
@@ -65,9 +68,9 @@ export default function splitTweet(thread) {
         return fullSentencesSplit;
     }
 
-    // Last, split any tweets that are still longer than the maximum
+    // Next, split any tweets that are still longer than the maximum
     // allowed tweet length
-    const output = fullSentencesSplit
+    const midSentenceSplit = fullSentencesSplit
         .map((tweet) => {
             if (tweet.length <= TWEET_LENGTH) {
                 return tweet;
@@ -75,6 +78,12 @@ export default function splitTweet(thread) {
 
             return breakLongSentence(tweet);
         })
+        .flat()
+        .map((tweet) => tweet.trim());
+
+    // Last, do a final pass going over the thread recombining any
+    // tweets that are too short
+    const output = recombineShortTweets(midSentenceSplit)
         .flat()
         .map((tweet) => tweet.trim());
 

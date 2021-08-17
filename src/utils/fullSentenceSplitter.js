@@ -39,6 +39,25 @@ export default function breakTextAtFullSentences(text) {
     return newlineSplit;
 }
 
+export function splitAtFirstFullstopOrNewline(text) {
+    /*
+        Splits the first sentence of a text made of multiple
+        sentences split by fullstops or newlines.
+
+        Returns the split text as an array.
+    */
+
+    // Get the index of the first fullstop and the first newline
+    // then use the least of them as the index of where to
+    // split the text
+    const firstFullstop = text.lastIndexOf(".");
+    const firstNewline = text.lastIndexOf("\n");
+    const splitIndex =
+        firstFullstop < firstNewline ? firstFullstop : firstNewline;
+
+    return [text.slice(0, splitIndex), text.slice(splitIndex)];
+}
+
 export function splitAtLastFullstopOrNewline(text) {
     /*
         Splits the last sentence of a text made of multiple

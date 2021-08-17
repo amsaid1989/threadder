@@ -1,11 +1,11 @@
 import { TWEET_LENGTH } from "./generalConstants";
 
-export default function breakLongSentence(sentence) {
+export function breakLongSentence(sentence) {
     /*
-     * Takes a tweet that is longer than the maximum character
-     * count allowed by Twitter and breaks it into an array of tweets that are
-     * all less than or equal to the maximum character count.
-     */
+        Takes a tweet that is longer than the maximum character
+        count allowed by Twitter and breaks it into an array of tweets that are
+        all less than or equal to the maximum character count.
+    */
 
     if (sentence.length <= TWEET_LENGTH) {
         return sentence;
@@ -89,11 +89,11 @@ export default function breakLongSentence(sentence) {
 
 function breakVeryLongWord(word) {
     /*
-     * Takes any word longer than the maximum character
-     * count allowed for Twitter and splits it into several tweets.
-     * This allows the app to handle user input if the user decides to
-     * type long strings with no spaces in between.
-     */
+        Takes any word longer than the maximum character
+        count allowed for Twitter and splits it into several tweets.
+        This allows the app to handle user input if the user decides to
+        type long strings with no spaces in between.
+    */
 
     if (word.length <= TWEET_LENGTH) {
         return word;
@@ -124,8 +124,8 @@ function breakVeryLongWord(word) {
 
 function removeEllipsisFromTweet(tweet) {
     /*
-     * Removes the ellipsis from the end of a tweet
-     */
+        Removes the ellipsis from the end of a tweet
+    */
 
     const lastThreeCharacters = tweet.slice(tweet.length - 3);
 
@@ -136,11 +136,11 @@ function removeEllipsisFromTweet(tweet) {
     }
 }
 
-function recombineShortTweets(threadArray) {
+export function recombineShortTweets(threadArray) {
     /*
-     * Takes an array of tweets and iterates over it combining any
-     * consecutive tweets that can fit in a single tweet
-     */
+        Takes an array of tweets and iterates over it combining any
+        consecutive tweets that can fit in a single tweet
+    */
 
     // The output array
     let combinedTweets = [];
