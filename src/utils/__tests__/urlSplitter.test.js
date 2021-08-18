@@ -1,4 +1,4 @@
-import urlSplitter, { isURL } from "../urlSplitter";
+import { isURL, detectAndSplitURLs, urlSplitter } from "../urlSplitter";
 
 describe("urlSplitter", () => {
     describe("isURL()", () => {
@@ -29,7 +29,7 @@ describe("urlSplitter", () => {
 
     describe("detectAndSplitURLs", () => {
         test("should find a URL in a text and split the text into an array with the URL as a separate item", () => {
-            const output = urlSplitter("My website is www.google.com");
+            const output = detectAndSplitURLs("My website is www.google.com");
 
             expect(output).toBeInstanceOf(Array);
             expect(output).toHaveLength(2);
@@ -37,7 +37,7 @@ describe("urlSplitter", () => {
         });
 
         test("should find several URLs in a text and split each of them into a separate item", () => {
-            const output = urlSplitter(
+            const output = detectAndSplitURLs(
                 "My two favorite websites are www.google.com and www.twitter.com."
             );
 
@@ -52,11 +52,54 @@ describe("urlSplitter", () => {
         });
 
         test("should return the full string as a single item in an array if no URLs exist", () => {
-            const output = urlSplitter("This is my URL-free text");
+            const output = detectAndSplitURLs("This is my URL-free text");
 
             expect(output).toBeInstanceOf(Array);
             expect(output).toHaveLength(1);
             expect(output).toEqual(["This is my URL-free text"]);
+        });
+    });
+
+    describe("joinCurrentTweetToPrevious", () => {
+        test("should correctly determine whether to add space or not when joining two tweets based on the last two characters of the first tweet and the first character of the second tweet", () => {
+            expect(
+                urlSplitter.joinCurrentTweetToPrevious(
+                    "This is my current tweet.",
+                    "This is my previous tweet."
+                )
+            ).toBe("This is my previous tweet. This is my current tweet.");
+
+            expect(
+                urlSplitter.joinCurrentTweetToPrevious(
+                    "and this is my current tweet.",
+                    "This is my previous tweet,"
+                )
+            ).toBe("This is my previous tweet, and this is my current tweet.");
+
+            expect(
+                urlSplitter.joinCurrentTweetToPrevious(
+                    ", and this is my current tweet.",
+                    "This is my previous tweet"
+                )
+            ).toBe("This is my previous tweet, and this is my current tweet.");
+
+            expect(
+                urlSplitter.joinCurrentTweetToPrevious(
+                    "How are you feeling,' he said.",
+                    "This is the beginning of a quote '"
+                )
+            ).toBe(
+                "This is the beginning of a quote 'How are you feeling,' he said."
+            );
+
+            expect(
+                urlSplitter.joinCurrentTweetToPrevious(
+                    "so this tweet should be joined without a space).",
+                    "This tweet ends with opening parens ("
+                )
+            ).toBe(
+                "This tweet ends with opening parens (so this tweet should be joined without a space)."
+            );
         });
     });
 });

@@ -91,10 +91,10 @@ export default function splitTweet(thread) {
 }
 
 function allTweetsFitLength(threadArray) {
-    /*
-        Utility function that makes sure that the length of every tweet
-        in an array is less than or equal to the defined tweet length
-    */
+    /**
+     * Utility function that makes sure that the length of every tweet
+     * in an array is less than or equal to the defined tweet length
+     */
 
     return threadArray.every((tweet) => tweet.length <= TWEET_LENGTH);
 }

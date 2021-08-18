@@ -1,11 +1,11 @@
 import { TWEET_LENGTH } from "./generalConstants";
 
 export function breakLongSentence(sentence) {
-    /*
-        Takes a tweet that is longer than the maximum character
-        count allowed by Twitter and breaks it into an array of tweets that are
-        all less than or equal to the maximum character count.
-    */
+    /**
+     * Takes a tweet that is longer than the maximum character
+     * count allowed by Twitter and breaks it into an array of tweets that are
+     * all less than or equal to the maximum character count.
+     */
 
     if (sentence.length <= TWEET_LENGTH) {
         return sentence;
@@ -80,67 +80,14 @@ export function breakLongSentence(sentence) {
         splitTweets[lastTweetIndex]
     );
 
-    // Go over the tweets array and combine any two or more split tweets that
-    // could actually fit in one single tweet
-    splitTweets = recombineShortTweets(splitTweets);
-
     return splitTweets;
-}
-
-function breakVeryLongWord(word) {
-    /*
-        Takes any word longer than the maximum character
-        count allowed for Twitter and splits it into several tweets.
-        This allows the app to handle user input if the user decides to
-        type long strings with no spaces in between.
-    */
-
-    if (word.length <= TWEET_LENGTH) {
-        return word;
-    }
-
-    // Define a tweet length that is 3 characters shorter than the maximum
-    // length allowed by Twitter because the function will add ellipsis "..."
-    // to the end of the tweet to indicate that this tweet is breaking a word
-    // in the middle
-    const localTweetLength = TWEET_LENGTH - 3;
-
-    // Get how many tweets are needed to include the entire word
-    const tweetCount = Math.ceil(word.length / localTweetLength);
-
-    let splitTweets = [];
-
-    for (let i = 0; i < tweetCount; i++) {
-        const sliceStart = i * localTweetLength;
-        const sliceEnd = (i + 1) * localTweetLength;
-
-        let outWord = word.slice(sliceStart, sliceEnd) + "...";
-
-        splitTweets.push(outWord);
-    }
-
-    return splitTweets;
-}
-
-function removeEllipsisFromTweet(tweet) {
-    /*
-        Removes the ellipsis from the end of a tweet
-    */
-
-    const lastThreeCharacters = tweet.slice(tweet.length - 3);
-
-    if (lastThreeCharacters === "...") {
-        return tweet.slice(0, tweet.length - 3);
-    } else {
-        return tweet;
-    }
 }
 
 export function recombineShortTweets(threadArray) {
-    /*
-        Takes an array of tweets and iterates over it combining any
-        consecutive tweets that can fit in a single tweet
-    */
+    /**
+     * Takes an array of tweets and iterates over it combining any
+     * consecutive tweets that can fit in a single tweet
+     */
 
     // The output array
     let combinedTweets = [];
@@ -173,6 +120,55 @@ export function recombineShortTweets(threadArray) {
     }
 
     return combinedTweets;
+}
+
+function breakVeryLongWord(word) {
+    /**
+     * Takes any word longer than the maximum character
+     * count allowed for Twitter and splits it into several tweets.
+     * This allows the app to handle user input if the user decides to
+     * type long strings with no spaces in between.
+     */
+
+    if (word.length <= TWEET_LENGTH) {
+        return word;
+    }
+
+    // Define a tweet length that is 3 characters shorter than the maximum
+    // length allowed by Twitter because the function will add ellipsis "..."
+    // to the end of the tweet to indicate that this tweet is breaking a word
+    // in the middle
+    const localTweetLength = TWEET_LENGTH - 3;
+
+    // Get how many tweets are needed to include the entire word
+    const tweetCount = Math.ceil(word.length / localTweetLength);
+
+    let splitTweets = [];
+
+    for (let i = 0; i < tweetCount; i++) {
+        const sliceStart = i * localTweetLength;
+        const sliceEnd = (i + 1) * localTweetLength;
+
+        let outWord = word.slice(sliceStart, sliceEnd) + "...";
+
+        splitTweets.push(outWord);
+    }
+
+    return splitTweets;
+}
+
+function removeEllipsisFromTweet(tweet) {
+    /**
+     * Removes the ellipsis from the end of a tweet
+     */
+
+    const lastThreeCharacters = tweet.slice(tweet.length - 3);
+
+    if (lastThreeCharacters === "...") {
+        return tweet.slice(0, tweet.length - 3);
+    } else {
+        return tweet;
+    }
 }
 
 // Module functions exported mainly for testing purposes
