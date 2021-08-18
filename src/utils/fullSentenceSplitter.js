@@ -115,6 +115,15 @@ function getSplitIndex(a, b, last = false) {
     }
 }
 
+function addFullstopAtEnd(sentence) {
+    /**
+     * Helper function that appends a full stop to the end of the sentence
+     * provided.
+     */
+
+    return `${sentence}.`;
+}
+
 function trimTopAndTailSpaces(text) {
     /**
      * Removes any spaces or tab characters from the start and end of
@@ -130,32 +139,87 @@ function trimTopAndTailSpaces(text) {
 }
 
 function splitAtFullstops(text) {
-    /*
-        Takes a string that has multiple sentences ending in full stops
-        and splits it into an array of single sentences that each contain
-        the full stop at the end.
-        
-        It works by checking for any full stops that are followed by
-        a letter or a newline character because that would mean they are
-        at the middle of the string. It then splits the string at these
-        full stops, which removes them from the sentences, then rejoins
-        the whole string with a full stop followed by a space.
-        
-        Next, it splits the string again at any space character that is
-        preceded by a full stop. The result of this is that each sentence
-        would end up keeping its full stop.
-    */
+    /**
+     * Takes a string that has multiple sentences ending in full stops
+     * and splits it into an array of single sentences that each contain
+     * the full stop at the end.
+     *
+     * It works by checking for any full stops that are followed by
+     * a letter or a newline character because that would mean they are
+     * at the middle of the string. It then splits the string at these
+     * full stops, which removes them from the sentences, then rejoins
+     * the whole string with a full stop followed by a space.
+     *
+     * Next, it splits the string again at any space character that is
+     * preceded by a full stop. The result of this is that each sentence
+     * would end up keeping its full stop.
+     */
 
+    /**
+     * Let's break this regex pattern down to clarify what it does exactly.
+     *
+     * The pattern is actually 2 patterns combined as alternatives.
+     *
+     * The first one is this:
+     * (?<!\svs?)(?<=\s\w+[a-zA-Z]+)\.(?=\s*[a-zA-Z]+\w*)
+     *
+     * (?<!\svs?)
+     * It starts with a negative lookbehind that ensures the full stop
+     * is not preceded by the abbreviations 'v' or 'vs' for versus. This
+     * is to avoid splitting the sentence at the abbreviation since it
+     * almost always comes mid-sentence.
+     *
+     * (?<=\s\w+[a-zA-Z]+)
+     * Then, we have a positive lookbehind that makes sure the full stop
+     * is preceded by a string of text that is made of at least 1 alphabetical
+     * character and 1 word character (a-zA-Z0-9_). This is to avoid splitting
+     * sentences when initials are encountered. For instance, Abdelrahman
+     * M. Said shouldn't be split after the M. It also ensure that the last
+     * character before the full stop is alphabetical. This is to avoid
+     * splitting at points that separate currencies which have no symbol,
+     * and uses alphabetical letters instead. For example, EGP4.5M, won't be
+     * split, because the last character before the full stop is a digit.
+     *
+     * \.
+     * Next, we have the pattern that matches the full stop character.
+     *
+     * (?=\s*[a-zA-Z]+\w*)
+     * And lastly, for the first pattern, we have a positive lookahead which
+     * ensures that the full stop is succeeded by at least 1 alphabetical
+     * character that comes immediately after it. It will also match any
+     * length of word or non-word characters that follow the alphabetical
+     * one.
+     *
+     *
+     * The second alternative is this:
+     * (?<=\d+[\s./-]\d+|\s\d+)\.(?=\s*\W*[a-zA-Z]+\w*\W*)
+     *
+     * (?<=\d+[\s./-]\d+|\s\d+)
+     * This one starts with a positive lookbehind that looks for either
+     * a string of digits that is at least 1 digit long and that is preceded
+     * by a space or a sequence of digits separated by some of the separator
+     * used with dates or IP addresses such as ., -, and /.
+     *
+     * This is combined with a similar positive lookahead to the one in the
+     * previous pattern. This ensures that a sequence of digits at the end
+     * of a sentence will be captured correctly (lorem ipsum 2019.)
+     *
+     * If the sentence ends with something like an IP address (127.0.0.1.),
+     * then the pattern will only match the last full stop.
+     *
+     *
+     * The last alternative is the simplest:
+     * \.$
+     *
+     * It matches the full stop at the end of the provided text.
+     */
     const removeFullstopPattern =
-        /(?<=\d*[a-zA-Z]\w+)\.(?=\s*\d*[a-zA-Z]\w*\n?)/g;
-    const removeSpacePattern = /(?<=\d*[a-zA-Z]\w+\.)\s/g;
+        /(?<!\svs?)(?<=\s\w+[a-zA-Z]+)\.(?=\s*[a-zA-Z]+\w*)|(?<=\d+[\s./-]\d+|\s\d+)\.(?=\s*\W*[a-zA-Z]+\w*\W*)|\.$/g;
 
     return text
         .split(removeFullstopPattern)
         .filter((sentence) => sentence !== "")
-        .join(". ")
-        .split(removeSpacePattern)
-        .map((sentence) => trimTopAndTailSpaces(sentence));
+        .map((sentence) => addFullstopAtEnd(trimTopAndTailSpaces(sentence)));
 }
 
 function combineSentencesIntoTweets(sentenceArray, combiningCharacter = " ") {

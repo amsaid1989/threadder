@@ -4,11 +4,6 @@ import {
     breakLongSentence,
     recombineShortTweets,
 } from "../utils/midSentenceSplitter";
-import {
-    isURL,
-    detectAndSplitURLs,
-    rejoinURLsIntoTweets,
-} from "../utils/urlSplitter";
 
 export default function splitTweet(thread) {
     const cleanedThread = thread.trim();
@@ -25,27 +20,11 @@ export default function splitTweet(thread) {
         return userDefinedSplits;
     }
 
-    // Second, split any URLs in the text, so they are protected from
-    // being broken down
-    const splitAtURLs = userDefinedSplits
-        .map((tweet) => detectAndSplitURLs(tweet))
-        .flat()
-        .map((tweet) => tweet.trim());
-
-    // TODO: Add a step to shorten the URLs
-
-    // Third, split the tweet at full sentences that fit within a tweet
-    let fullSentencesSplit = splitAtURLs
-        .map((tweet, index, arr) => {
-            // If the length of the current tweet fits with a single tweet
-            // and it is the last tweet in the array, or the next tweet is
-            // not a URL, or if the current tweet itself is a URL, then do
-            // not attempt to split it at full sentences
-            if (
-                (tweet.length <= TWEET_LENGTH && !arr[index + 1]) ||
-                (tweet.length <= TWEET_LENGTH && !isURL(arr[index + 1])) ||
-                isURL(tweet)
-            ) {
+    // Third, split the tweet at full sentences if the tweet is longer
+    // than the maximum length allowed
+    const fullSentencesSplit = userDefinedSplits
+        .map((tweet) => {
+            if (tweet.length <= TWEET_LENGTH) {
                 return tweet;
             }
 
@@ -53,14 +32,6 @@ export default function splitTweet(thread) {
         })
         .flat()
         .map((tweet) => tweet.trim());
-
-    // If the thread has any tweets that include URLs, which would
-    // have been split earlier, then rejoin them into the tweets
-    if (fullSentencesSplit.some((tweet) => isURL(tweet))) {
-        fullSentencesSplit = rejoinURLsIntoTweets(fullSentencesSplit)
-            .flat()
-            .map((tweet) => tweet.trim());
-    }
 
     // Return early if all tweets are shorter than the maximum allowed
     // tweet length
