@@ -6,9 +6,6 @@ export default function breakTextAtFullSentences(text) {
      * the tweet splitter module.
      */
 
-    console.log(splitAtFullstops(text));
-    console.log(combineSentencesIntoTweets(splitAtFullstops(text)));
-
     const fullSentenceSplit = combineSentencesIntoTweets(
         splitAtFullstops(text)
     );
