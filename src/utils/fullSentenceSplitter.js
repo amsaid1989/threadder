@@ -4,121 +4,42 @@ export default function breakTextAtFullSentences(text) {
     /**
      * The main function of the module which will be used by
      * the tweet splitter module.
+     *
+     * It starts by splitting the text at newline characters,
+     * then splits any tweets that are still longer than the
+     * maximum tweet length at fullstops.
      */
 
-    const fullSentenceSplit = combineSentencesIntoTweets(
-        splitAtFullstops(text)
+    const newLineSplit = combineSentencesIntoTweets(
+        splitAtNewlines(text),
+        "\n"
     );
 
     // Return early if all tweets are shorter than the maximum
     // character count allowed for tweets
-    if (fullSentenceSplit.every((tweet) => tweet.length <= TWEET_LENGTH)) {
-        return fullSentenceSplit;
+    if (newLineSplit.every((tweet) => tweet.length <= TWEET_LENGTH)) {
+        return newLineSplit;
     }
 
     // If there are tweets that are still longer than the maxmium
     // allowed character count, attempt to split these tweets
-    // at newline characters, since a newline character is
-    // usually an indication of a new sentence. However, make sure
-    // that sentences aren't split into extermely short tweets
-    // by recombining them
-    const newlineSplit = combineSentencesIntoTweets(
-        fullSentenceSplit
+    // at fullstops, since a fullstop is usually an indication of
+    // a new sentence. However, make sure that sentences aren't
+    // split into extermely short tweets by recombining them
+    const fullSentenceSplit = combineSentencesIntoTweets(
+        newLineSplit
             .map((tweet) => {
                 if (tweet.length <= TWEET_LENGTH) {
                     return tweet;
                 }
 
-                return breakTweetAtNewlines(tweet);
+                return splitAtFullstops(tweet);
             })
             .flat()
-            .map((tweet) => tweet.trim()),
-        "\n"
+            .map((tweet) => tweet.trim())
     );
 
-    return newlineSplit;
-}
-
-export function splitAtFirstFullstopOrNewline(text) {
-    /**
-     *  Splits the first sentence of a text made of multiple
-     *  sentences split by fullstops or newlines.
-     *
-     *  Returns the split text as an array.
-     */
-
-    // Get the index of the first fullstop and the first newline
-    // then use the least of them as the index of where to
-    // split the text
-    const firstFullstop = text.indexOf(". ");
-    const firstNewline = text.indexOf("\n");
-
-    const indexComparison = getSplitIndex(firstFullstop, firstNewline);
-
-    const splitIndex = indexComparison === -1 ? text.length : indexComparison;
-
-    return [text.slice(0, splitIndex).trim(), text.slice(splitIndex).trim()];
-}
-
-export function splitAtLastFullstopOrNewline(text) {
-    /**
-     * Splits the last sentence of a text made of multiple
-     * sentences split by fullstops or newlines.
-     *
-     * Returns the split text as an array.
-     */
-
-    // Get the index of the last fullstop and the last newline
-    // then use the greatest of them as the index of where to
-    // split the text
-    const lastFullstop = text.lastIndexOf(". ");
-    const lastNewline = text.lastIndexOf("\n");
-
-    const indexComparison = getSplitIndex(lastFullstop, lastNewline, true);
-
-    const splitIndex = indexComparison === -1 ? text.length : indexComparison;
-
-    return [text.slice(0, splitIndex).trim(), text.slice(splitIndex).trim()];
-}
-
-function getSplitIndex(a, b, last = false) {
-    /**
-     * Compares two indices. If the two are less than 0,
-     * then it returns -1. If only one is less than 0,
-     * then it returns the other one.
-     *
-     * If both are greater than 0, then it relies on the
-     * last argument. If it is false, then it returns the
-     * smaller of the two. If last is true, then it returns
-     * the greater of the two.
-     */
-
-    if (a > 0 || b > 0) {
-        if (
-            b < 0 ||
-            (last && a > 0 && b > 0 && a > b) ||
-            (!last && a > 0 && b > 0 && a < b)
-        ) {
-            return a + 1;
-        } else if (
-            a < 0 ||
-            (last && a > 0 && b > 0 && b > a) ||
-            (!last && a > 0 && b > 0 && b < a)
-        ) {
-            return b + 1;
-        }
-    } else {
-        return -1;
-    }
-}
-
-function addFullstopAtEnd(sentence) {
-    /**
-     * Helper function that appends a full stop to the end of the sentence
-     * provided.
-     */
-
-    return `${sentence}.`;
+    return fullSentenceSplit;
 }
 
 function trimTopAndTailSpaces(text) {
@@ -133,6 +54,19 @@ function trimTopAndTailSpaces(text) {
     const endPattern = /[ \t]*$/;
 
     return text.replace(startPattern, "").replace(endPattern, "");
+}
+
+function splitAtNewlines(tweet) {
+    /**
+     * Takes a text and splits it into an array of tweets at the
+     * newline characters
+     */
+
+    return tweet.split(/(\n)/).filter((tweet, idx, arr) => {
+        // This filters double newline characters keeping only
+        // one of them
+        return tweet !== "\n" || (tweet === "\n" && arr[idx] !== "\n");
+    });
 }
 
 function splitAtFullstops(text) {
@@ -210,13 +144,23 @@ function splitAtFullstops(text) {
      *
      * It matches the full stop at the end of the provided text.
      */
+
     const removeFullstopPattern =
-        /(?<!\svs?)(?<=\s\w+[a-zA-Z]+)\.(?=\s*[a-zA-Z]+\w*)|(?<=\d+[\s./-]\d+|\s\d+)\.(?=\s*\W*[a-zA-Z]+\w*\W*)|\.$/g;
+        /((?<!\svs?)(?<=\s\w+[a-zA-Z]+)\.(?=\s*[a-zA-Z]+\w*)|(?<=\d+[\s./-]\d+|\s\d+)\.(?=\s*\W*[a-zA-Z]+\w*\W*)|\.$)/g;
 
     return text
         .split(removeFullstopPattern)
-        .filter((sentence) => sentence !== "")
-        .map((sentence) => addFullstopAtEnd(trimTopAndTailSpaces(sentence)));
+        .map((tweet, idx, arr) => {
+            if (arr[idx + 1] === ".") {
+                return `${tweet}.`;
+            } else if (tweet === ".") {
+                return "";
+            } else {
+                return tweet;
+            }
+        })
+        .filter((tweet) => tweet !== "")
+        .map((tweet) => trimTopAndTailSpaces(tweet));
 }
 
 function combineSentencesIntoTweets(sentenceArray, combiningCharacter = " ") {
@@ -281,22 +225,10 @@ function combineSentencesIntoTweets(sentenceArray, combiningCharacter = " ") {
     return outArray;
 }
 
-function breakTweetAtNewlines(tweet) {
-    /**
-     * Takes a text and splits it into an array of tweets at the
-     * newline characters
-     */
-
-    return tweet.split("\n").filter((tweet) => tweet !== "");
-}
-
 // Module functions exported mainly for testing purposes
 export const fsSplitter = {
     trimTopAndTailSpaces,
     splitAtFullstops,
     combineSentencesIntoTweets,
-    breakTweetAtNewlines,
-    getSplitIndex,
-    splitAtFirstFullstopOrNewline,
-    splitAtLastFullstopOrNewline,
+    splitAtNewlines,
 };
