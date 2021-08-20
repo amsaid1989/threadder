@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, createRef } from "react";
 import { makeStyles, ThemeProvider } from "@material-ui/core/styles";
 import queryString from "query-string";
 import classNames from "classnames";
@@ -61,11 +61,11 @@ const useStyles = makeStyles((theme) => ({
 export default function App(props) {
     const classes = useStyles();
 
-    const untitledUser = Object.freeze({
+    const untitledUser = {
         name: UNTITLED_NAME,
         screenName: UNTITLED_SCREEN_NAME,
         profileImage: UNTITLED_PROFILE_IMAGE,
-    });
+    };
 
     /* APP STATE */
     const [loggedIn, setLoggedIn] = useState(
@@ -80,6 +80,10 @@ export default function App(props) {
     const [thread, setThread] = useState([]);
     const [editing, setEditing] = useState(true);
     /* END APP STATE */
+
+    /* COMPONENT REFS */
+    const tweetInputRef = createRef();
+    /* END COMPONENT REFS */
 
     /* EVENT HANDLERS */
     const updateTweet = (event) => {
@@ -128,7 +132,9 @@ export default function App(props) {
          */
 
         if (loggedIn) {
-            publishThread(thread);
+            publishThread(thread).then(() => {
+                setTweetText("");
+            });
         } else {
             setSesssionStorageItem("toPublish", true);
 
@@ -138,6 +144,14 @@ export default function App(props) {
     /* END EVENT HANDLERS */
 
     /* SIDE EFFECTS */
+    // Give focus to the tweet input area on page load and whenever
+    // the tweet input is re-rendered
+    useEffect(() => {
+        if (tweetInputRef.current) {
+            tweetInputRef.current.focus();
+        }
+    }, [tweetInputRef]);
+
     // On page load, check if the toPublish sessionStorage item
     // is true. This would indicate that the page load happened
     // because the user clicked the Publish Thread button without
@@ -248,6 +262,7 @@ export default function App(props) {
                                         handleTweetInput={updateTweet}
                                         thread={thread}
                                         viewThreadHandler={toggleEditing}
+                                        ref={tweetInputRef}
                                     />
                                 </Grid>
                             </Hidden>

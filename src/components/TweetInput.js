@@ -1,3 +1,4 @@
+import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import classNames from "classnames";
 import Container from "@material-ui/core/Container";
@@ -61,7 +62,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-export default function TweetInput(props) {
+const TweetInput = React.forwardRef((props, ref) => {
     const classes = useStyles();
 
     return (
@@ -94,6 +95,7 @@ export default function TweetInput(props) {
                         onChange={props.handleTweetInput}
                         placeholder="Type your tweet here..."
                         value={props.tweetText}
+                        ref={ref}
                     />
                 </Container>
             </Grid>
@@ -133,4 +135,6 @@ export default function TweetInput(props) {
             </Hidden>
         </Grid>
     );
-}
+});
+
+export default TweetInput;

@@ -50,7 +50,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-export default function TweetInput(props) {
+export default function ThreadViewer(props) {
     const classes = useStyles();
 
     const tweets = props.thread.map((tweet, index, arr) => (
