@@ -4,7 +4,6 @@ import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import StyledButton from "./StyledButton";
 import LoggedInMenu from "./LoggedInMenu";
-import { login } from "../controllers/APICalls";
 
 /*
  * The styles and implementation of the app Header component.
@@ -31,7 +30,11 @@ export default function Header(props) {
 
     // The sign in StyledButton component
     const logInBtn = (
-        <StyledButton variant="contained" color="secondary" onClick={login}>
+        <StyledButton
+            variant="contained"
+            color="secondary"
+            onClick={props.login}
+        >
             Log in
         </StyledButton>
     );

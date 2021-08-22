@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useCookies } from "react-cookie";
 import { makeStyles } from "@material-ui/core/styles";
 import Box from "@material-ui/core/Box";
 import IconButton from "@material-ui/core/IconButton";
@@ -35,11 +34,9 @@ export default function LoggedInMenu(props) {
     const [anchorEl, setAnchorEl] = useState(null);
     /* END COMPONENT STATE */
 
-    const [cookie] = useCookies(["user"]);
-
     /* EVENT HANDLERS */
     const handleAvatarClick = (event) => {
-        /*
+        /**
          * This is used to set the Avatar as an anchor element for the
          * menu. In effect, it expands the menu whenever the Avatar is
          * clicked by the user.
@@ -55,7 +52,7 @@ export default function LoggedInMenu(props) {
     };
 
     const redirectToTwitter = () => {
-        /*
+        /**
          * Handles the click event for the Go to Twitter menu
          * item, redirecting the logged-in user to their Twitter
          * profile
@@ -63,13 +60,15 @@ export default function LoggedInMenu(props) {
 
         closeMenu();
 
-        const screenName = cookie.user.screenName;
+        const screenName = props.user.screenName;
 
-        document.location.href = `https://twitter.com/${screenName}`;
+        window.open(`https://twitter.com/${screenName}`, "_blank");
+
+        // document.location.href = `https://twitter.com/${screenName}`;
     };
 
     const logOutHandler = () => {
-        /*
+        /**
          * Handles the click event for the Logout menu item
          */
 

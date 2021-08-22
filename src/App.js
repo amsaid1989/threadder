@@ -1,6 +1,5 @@
 import { useState, useEffect, createRef } from "react";
 import { makeStyles, ThemeProvider } from "@material-ui/core/styles";
-import queryString from "query-string";
 import classNames from "classnames";
 import darkTheme from "./themes/threadder-dark-theme";
 import CssBaseline from "@material-ui/core/CssBaseline";
@@ -25,14 +24,18 @@ import {
 
 const useStyles = makeStyles((theme) => ({
     root: {
-        /*
+        /**
          * Styles that apply to the main Container component of the App
          */
         height: "100vh",
         maxHeight: "100vh",
+        [theme.breakpoints.down("sm")]: {
+            height: "93vh",
+            maxHeight: "93vh",
+        },
     },
     gridContainer: {
-        /*
+        /**
          * A class for the main grid layout of the App. It organises all
          * the main elements of the App in a column layout.
          */
@@ -56,6 +59,11 @@ const useStyles = makeStyles((theme) => ({
     hiddenOverflow: {
         overflow: "hidden",
     },
+    loggedInSuccess: {
+        color: theme.palette.primary.contrastText,
+        textAlign: "center",
+        fontWeight: "normal",
+    },
 }));
 
 export default function App(props) {
@@ -68,6 +76,7 @@ export default function App(props) {
     };
 
     /* APP STATE */
+    const [loginCallback, setLoginCallback] = useState(false);
     const [loggedIn, setLoggedIn] = useState(
         getSesssionStorageItem("loggedIn") || false
     );
@@ -82,12 +91,15 @@ export default function App(props) {
     /* END APP STATE */
 
     /* COMPONENT REFS */
+    // createRef is used rather than useRef because the ref is
+    // being forwarded, and useRef doesn't seem to allow for
+    // ref forwarding.
     const tweetInputRef = createRef();
     /* END COMPONENT REFS */
 
-    /* EVENT HANDLERS */
+    /* EVENT HANDLERS AND FUNCTIONS */
     const updateTweet = (event) => {
-        /*
+        /**
          * Handles user input in the textarea where the user
          * types the tweet they want to split into a thread.
          */
@@ -97,7 +109,7 @@ export default function App(props) {
         setTweetText(text);
     };
     const toggleEditing = () => {
-        /*
+        /**
          * Handles switching between editing the tweet and
          * viewing the thread when the app is used on mobile
          * phones
@@ -105,8 +117,16 @@ export default function App(props) {
 
         setEditing(!editing);
     };
+    const loginHandler = () => {
+        login()
+            .then((user) => {
+                setLoggedIn(true);
+                setUser(user);
+            })
+            .catch((err) => console.log(err));
+    };
     const finaliseLogout = () => {
-        /*
+        /**
          * A convenience function that resets the loggedIn
          * and user states to their initial values. It is
          * used when the page reloads after the login process
@@ -118,8 +138,15 @@ export default function App(props) {
         setLoggedIn(false);
         setUser(untitledUser);
     };
+    const publishTweets = () => {
+        publishThread(thread)
+            .then(() => {
+                setTweetText("");
+            })
+            .catch((err) => console.log(err));
+    };
     const publishThreadHandler = () => {
-        /*
+        /**
          * Handles the click event of the Publish Thread button.
          * If the user is already logged in, then it just publishes
          * the thread. Otherwise, it sets the toPublish item in
@@ -132,18 +159,25 @@ export default function App(props) {
          */
 
         if (loggedIn) {
-            publishThread(thread).then(() => {
-                setTweetText("");
-            });
+            publishTweets();
         } else {
             setSesssionStorageItem("toPublish", true);
 
-            login();
+            loginHandler();
         }
     };
-    /* END EVENT HANDLERS */
+    /* END EVENT HANDLERS AND FUNCTIONS */
 
     /* SIDE EFFECTS */
+    // When the backend redirects to the app, this will set the
+    // state appropriately to only show a success message rather
+    // than the app components
+    useEffect(() => {
+        if (document.location.search !== "") {
+            setLoginCallback(true);
+        }
+    }, []);
+
     // Give focus to the tweet input area on page load and whenever
     // the tweet input is re-rendered
     useEffect(() => {
@@ -160,23 +194,12 @@ export default function App(props) {
         if (getSesssionStorageItem("toPublish")) {
             setSesssionStorageItem("toPublish", false);
 
-            const storedThread = getSesssionStorageItem("thread");
-
-            publishThread(storedThread);
+            publishTweets();
         }
     });
 
-    useEffect(() => {
-        if (document.location.search !== "") {
-            setLoggedIn(true);
-
-            const userObj = queryString.parse(document.location.search);
-            setUser(userObj);
-
-            document.location.search = "";
-        }
-    }, []);
-
+    // On page load, if the user data is set in session storage
+    // load the user data and set the user object
     useEffect(() => {
         const userObj = getSesssionStorageItem("user");
 
@@ -191,10 +214,12 @@ export default function App(props) {
         }
     }, []);
 
+    // Update the session storage when the logged in state changes
     useEffect(() => {
         setSesssionStorageItem("loggedIn", loggedIn);
     }, [loggedIn]);
 
+    // Update the session storage when the user state changes
     useEffect(() => {
         setSesssionStorageItem("user", user);
     }, [user]);
@@ -222,73 +247,88 @@ export default function App(props) {
     return (
         <ThemeProvider theme={darkTheme}>
             <CssBaseline>
-                <Container className={classes.root}>
-                    <Grid
-                        container
-                        spacing={3}
-                        className={classes.gridContainer}
-                    >
-                        {/* App Header grid item */}
-                        <Grid item xs={12} className={classes.appHeader}>
-                            <Header
-                                user={user}
-                                loggedIn={loggedIn}
-                                setLoggedOutState={finaliseLogout}
-                            />
-                        </Grid>
+                {/* The following component will render only when the backend redirects to the app
+                after the user logs in successfully */}
+                {loginCallback && (
+                    <Container className={classes.root}>
+                        <h2 className={classes.loggedInSuccess}>
+                            Logged in successfully
+                        </h2>
+                    </Container>
+                )}
 
-                        {/* Grid item that holds both TweetInput and the ThreadViewer */}
+                {!loginCallback && (
+                    <Container className={classes.root}>
                         <Grid
-                            item
-                            xs={12}
-                            className={classNames(
-                                classes.appView,
-                                classes.hiddenOverflow
-                            )}
+                            container
+                            spacing={3}
+                            className={classes.gridContainer}
                         >
-                            {/* TweetInput item which gets hidden in mobile views if not editing */}
-                            <Hidden smDown={!editing}>
-                                <Grid
-                                    item
-                                    xs={12}
-                                    md={7}
-                                    className={classNames(
-                                        classes.mainArea,
-                                        classes.hiddenOverflow
-                                    )}
-                                >
-                                    <TweetInput
-                                        tweetText={tweetText}
-                                        handleTweetInput={updateTweet}
-                                        thread={thread}
-                                        viewThreadHandler={toggleEditing}
-                                        ref={tweetInputRef}
-                                    />
-                                </Grid>
-                            </Hidden>
+                            {/* App Header grid item */}
+                            <Grid item xs={12} className={classes.appHeader}>
+                                <Header
+                                    user={user}
+                                    loggedIn={loggedIn}
+                                    setLoggedOutState={finaliseLogout}
+                                    login={loginHandler}
+                                />
+                            </Grid>
 
-                            {/* ThreadViewer item which gets hidden in mobile views when editing */}
-                            <Hidden smDown={editing}>
-                                <Grid
-                                    item
-                                    xs={12}
-                                    md={5}
-                                    className={classNames(
-                                        classes.mainArea,
-                                        classes.hiddenOverflow
-                                    )}
-                                >
-                                    <ThreadViewer
-                                        user={user}
-                                        thread={thread}
-                                        editThreadHandler={toggleEditing}
-                                        publishHandler={publishThreadHandler}
-                                    />
-                                </Grid>
-                            </Hidden>
+                            {/* Grid item that holds both TweetInput and the ThreadViewer */}
+                            <Grid
+                                item
+                                xs={12}
+                                className={classNames(
+                                    classes.appView,
+                                    classes.hiddenOverflow
+                                )}
+                            >
+                                {/* TweetInput item which gets hidden in mobile views if not editing */}
+                                <Hidden smDown={!editing}>
+                                    <Grid
+                                        item
+                                        xs={12}
+                                        md={7}
+                                        className={classNames(
+                                            classes.mainArea,
+                                            classes.hiddenOverflow
+                                        )}
+                                    >
+                                        <TweetInput
+                                            tweetText={tweetText}
+                                            handleTweetInput={updateTweet}
+                                            thread={thread}
+                                            viewThreadHandler={toggleEditing}
+                                            ref={tweetInputRef}
+                                        />
+                                    </Grid>
+                                </Hidden>
+
+                                {/* ThreadViewer item which gets hidden in mobile views when editing */}
+                                <Hidden smDown={editing}>
+                                    <Grid
+                                        item
+                                        xs={12}
+                                        md={5}
+                                        className={classNames(
+                                            classes.mainArea,
+                                            classes.hiddenOverflow
+                                        )}
+                                    >
+                                        <ThreadViewer
+                                            user={user}
+                                            thread={thread}
+                                            editThreadHandler={toggleEditing}
+                                            publishHandler={
+                                                publishThreadHandler
+                                            }
+                                        />
+                                    </Grid>
+                                </Hidden>
+                            </Grid>
                         </Grid>
-                    </Grid>
-                </Container>
+                    </Container>
+                )}
             </CssBaseline>
         </ThemeProvider>
     );
