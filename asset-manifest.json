@@ -1,20 +1,20 @@
 {
   "files": {
     "main.css": "/threadder/static/css/main.d94212a3.chunk.css",
-    "main.js": "/threadder/static/js/main.ee44acbc.chunk.js",
-    "main.js.map": "/threadder/static/js/main.ee44acbc.chunk.js.map",
+    "main.js": "/threadder/static/js/main.13b4f252.chunk.js",
+    "main.js.map": "/threadder/static/js/main.13b4f252.chunk.js.map",
     "runtime-main.js": "/threadder/static/js/runtime-main.73fd8acf.js",
     "runtime-main.js.map": "/threadder/static/js/runtime-main.73fd8acf.js.map",
-    "static/js/2.6a73f5e0.chunk.js": "/threadder/static/js/2.6a73f5e0.chunk.js",
-    "static/js/2.6a73f5e0.chunk.js.map": "/threadder/static/js/2.6a73f5e0.chunk.js.map",
+    "static/js/2.3b8fd18e.chunk.js": "/threadder/static/js/2.3b8fd18e.chunk.js",
+    "static/js/2.3b8fd18e.chunk.js.map": "/threadder/static/js/2.3b8fd18e.chunk.js.map",
     "index.html": "/threadder/index.html",
     "static/css/main.d94212a3.chunk.css.map": "/threadder/static/css/main.d94212a3.chunk.css.map",
-    "static/js/2.6a73f5e0.chunk.js.LICENSE.txt": "/threadder/static/js/2.6a73f5e0.chunk.js.LICENSE.txt"
+    "static/js/2.3b8fd18e.chunk.js.LICENSE.txt": "/threadder/static/js/2.3b8fd18e.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
     "static/js/runtime-main.73fd8acf.js",
-    "static/js/2.6a73f5e0.chunk.js",
+    "static/js/2.3b8fd18e.chunk.js",
     "static/css/main.d94212a3.chunk.css",
-    "static/js/main.ee44acbc.chunk.js"
+    "static/js/main.13b4f252.chunk.js"
   ]
 }
