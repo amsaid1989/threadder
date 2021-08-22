@@ -75,7 +75,7 @@ function checkLoginStatus(window) {
             clearInterval(checkStatusInterval);
 
             reject("Login failed");
-        }, 15000);
+        }, 30000);
     });
 }
 
