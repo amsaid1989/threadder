@@ -123,6 +123,7 @@ export default function App(props) {
             .then((user) => {
                 setLoggedIn(true);
                 setUser(user);
+                document.location.reload();
             })
             .catch((err) => console.log(err));
     };
