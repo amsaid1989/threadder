@@ -91,7 +91,6 @@ export function login() {
         // Return a Promise that will always close the popup window
         // whether the login was successful or not
         return checkLoginStatus(popup).finally(() => popup.close());
-        // document.location.href = response.data.redirect;
     });
 }
 

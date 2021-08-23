@@ -77,7 +77,7 @@ export default function App(props) {
     };
 
     /* APP STATE */
-    const [loginCallback, setLoginCallback] = useState(false);
+    const [loginSuccessfulView, setLoginSuccessfulView] = useState(false);
     const [loggedIn, setLoggedIn] = useState(
         getSesssionStorageItem("loggedIn") || false
     );
@@ -123,7 +123,6 @@ export default function App(props) {
             .then((user) => {
                 setLoggedIn(true);
                 setUser(user);
-                document.location.reload();
             })
             .catch((err) => console.log(err));
     };
@@ -176,11 +175,7 @@ export default function App(props) {
     // than the app components
     useEffect(() => {
         if (document.location.search !== "") {
-            setLoginCallback(true);
-            // const user = queryString.parse(document.location.search);
-
-            // setLoggedIn(true);
-            // setUser(user);
+            setLoginSuccessfulView(true);
         }
     }, []);
 
@@ -255,7 +250,7 @@ export default function App(props) {
             <CssBaseline>
                 {/* The following component will render only when the backend redirects to the app
                 after the user logs in successfully */}
-                {loginCallback && (
+                {loginSuccessfulView && (
                     <Container className={classes.root}>
                         <h2 className={classes.loggedInSuccess}>
                             Logged in successfully
@@ -263,7 +258,7 @@ export default function App(props) {
                     </Container>
                 )}
 
-                {!loginCallback && (
+                {!loginSuccessfulView && (
                     <Container className={classes.root}>
                         <Grid
                             container
