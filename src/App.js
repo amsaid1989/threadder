@@ -1,5 +1,6 @@
 import { useState, useEffect, createRef } from "react";
 import { makeStyles, ThemeProvider } from "@material-ui/core/styles";
+import queryString from "query-string";
 import classNames from "classnames";
 import darkTheme from "./themes/threadder-dark-theme";
 import CssBaseline from "@material-ui/core/CssBaseline";
@@ -118,12 +119,12 @@ export default function App(props) {
         setEditing(!editing);
     };
     const loginHandler = () => {
-        login()
-            .then((user) => {
-                setLoggedIn(true);
-                setUser(user);
-            })
-            .catch((err) => console.log(err));
+        login();
+        // .then((user) => {
+        //     setLoggedIn(true);
+        //     setUser(user);
+        // })
+        // .catch((err) => console.log(err));
     };
     const finaliseLogout = () => {
         /**
@@ -174,7 +175,11 @@ export default function App(props) {
     // than the app components
     useEffect(() => {
         if (document.location.search !== "") {
-            setLoginCallback(true);
+            // setLoginCallback(true);
+            const user = queryString.parse(document.location.search);
+
+            setLoggedIn(true);
+            setUser(user);
         }
     }, []);
 

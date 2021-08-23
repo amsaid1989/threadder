@@ -86,11 +86,12 @@ export function login() {
 
     return sendAPIRequest("/request_token", "get").then((response) => {
         // Start the login process in a popup window
-        const popup = launchLoginPopup(response.data.redirect);
+        // const popup = launchLoginPopup(response.data.redirect);
 
         // Return a Promise that will always close the popup window
         // whether the login was successful or not
-        return checkLoginStatus(popup).finally(() => popup.close());
+        // return checkLoginStatus(popup).finally(() => popup.close());
+        document.location.href = response.data.redirect;
     });
 }
 
