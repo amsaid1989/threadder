@@ -1,6 +1,5 @@
 import { useState, useEffect, createRef } from "react";
 import { makeStyles, ThemeProvider } from "@material-ui/core/styles";
-import queryString from "query-string";
 import classNames from "classnames";
 import darkTheme from "./themes/threadder-dark-theme";
 import CssBaseline from "@material-ui/core/CssBaseline";
@@ -10,8 +9,9 @@ import Hidden from "@material-ui/core/Hidden";
 import Header from "./components/Header";
 import TweetInput from "./components/TweetInput";
 import ThreadViewer from "./components/ThreadViewer";
+import MessagesDialog from "./components/MessagesDialog";
 import splitTweet from "./controllers/tweetSplitter";
-import { isNotEmpty, containsAllKeys } from "./utils/objectIntegrityCheckers";
+import { checkUserObject } from "./utils/objectIntegrityCheckers";
 import { login, publishThread } from "./controllers/APICalls";
 import {
     setSesssionStorageItem,
@@ -77,6 +77,12 @@ export default function App(props) {
     };
 
     /* APP STATE */
+    // Feedback dialog states
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [dialogMessage, setDialogMessage] = useState(
+        "This is an empty dialog"
+    );
+
     const [loginSuccessfulView, setLoginSuccessfulView] = useState(false);
     const [loggedIn, setLoggedIn] = useState(
         getSesssionStorageItem("loggedIn") || false
@@ -118,13 +124,45 @@ export default function App(props) {
 
         setEditing(!editing);
     };
+    const hideLoginSuccessCallback = () => {
+        /**
+         * Sets the state to hide the login success view that
+         * shows in the login popup window. It is intended to
+         * be passed as the callback to the login API call.
+         */
+
+        setLoginSuccessfulView(false);
+    };
     const loginHandler = () => {
-        login()
+        showDialog("Please wait while we try to log you into your account");
+
+        login(hideLoginSuccessCallback)
             .then((user) => {
-                setLoggedIn(true);
-                setUser(user);
+                if (checkUserObject(user)) {
+                    setLoggedIn(true);
+                    setUser(user);
+
+                    postLogin();
+                }
             })
-            .catch((err) => console.log(err));
+            .catch((err) => console.log(err))
+            .finally(closeDialog);
+    };
+    const postLogin = () => {
+        /**
+         * Checks if the thread needs to be published once
+         * the login is successful. If it does, then it
+         * publishes it.
+         *
+         * This happens when the user clicks the Publish
+         * Thread button without logging in, which would
+         * start the login sequence.
+         */
+        if (getSesssionStorageItem("publishAfterLogin")) {
+            setSesssionStorageItem("publishAfterLogin", false);
+
+            publishTweets();
+        }
     };
     const finaliseLogout = () => {
         /**
@@ -140,29 +178,54 @@ export default function App(props) {
         setUser(untitledUser);
     };
     const publishTweets = () => {
+        /**
+         * A helper function that handles calling the function
+         * that sends the thread to the backend and clears the
+         * tweet input textarea if the thread was published
+         * successfully.
+         */
+
+        showDialog("Hold tight while we publish your thread");
+
         publishThread(thread)
             .then(() => {
                 setTweetText("");
             })
-            .catch((err) => console.log(err));
+            .catch((err) => console.log(err))
+            .finally(closeDialog);
+    };
+    const showDialog = (message) => {
+        /**
+         * Opens the modal dialog with the specified message.
+         */
+
+        setDialogMessage(message);
+        setDialogOpen(true);
+    };
+    const closeDialog = () => {
+        /**
+         * Closes the modal dialog.
+         */
+
+        setDialogOpen(false);
     };
     const publishThreadHandler = () => {
         /**
          * Handles the click event of the Publish Thread button.
          * If the user is already logged in, then it just publishes
-         * the thread. Otherwise, it sets the toPublish item in
-         * the sessionStorage to true and initiates the login
-         * process.
+         * the thread. Otherwise, it sets the publishAfterLogin
+         * item in the sessionStorage to true and initiates the
+         * login process.
          *
-         * The toPublish sessionStorage item determines whether
-         * the application needs to publish a thread when the
-         * page reloads or not.
+         * The publishAfterLogin sessionStorage item determines
+         * whether the application needs to publish a thread after
+         * the user logs in successfully.
          */
 
         if (loggedIn) {
             publishTweets();
         } else {
-            setSesssionStorageItem("toPublish", true);
+            setSesssionStorageItem("publishAfterLogin", true);
 
             loginHandler();
         }
@@ -179,6 +242,17 @@ export default function App(props) {
         }
     }, []);
 
+    // On page load, if the user data is set in session storage
+    // load the user data and set the user object
+    useEffect(() => {
+        const userObj = getSesssionStorageItem("user");
+
+        if (checkUserObject(userObj)) {
+            setLoggedIn(true);
+            setUser(getSesssionStorageItem("user"));
+        }
+    }, []);
+
     // Give focus to the tweet input area on page load and whenever
     // the tweet input is re-rendered
     useEffect(() => {
@@ -186,34 +260,6 @@ export default function App(props) {
             tweetInputRef.current.focus();
         }
     }, [tweetInputRef]);
-
-    // On page load, check if the toPublish sessionStorage item
-    // is true. This would indicate that the page load happened
-    // because the user clicked the Publish Thread button without
-    // being logged in, which initiated the login process.
-    useEffect(() => {
-        if (getSesssionStorageItem("toPublish")) {
-            setSesssionStorageItem("toPublish", false);
-
-            publishTweets();
-        }
-    });
-
-    // On page load, if the user data is set in session storage
-    // load the user data and set the user object
-    useEffect(() => {
-        const userObj = getSesssionStorageItem("user");
-
-        if (
-            userObj !== null &&
-            isNotEmpty(userObj) &&
-            containsAllKeys(userObj, ["name", "screenName", "profileImage"]) &&
-            userObj.name !== UNTITLED_NAME
-        ) {
-            setLoggedIn(true);
-            setUser(getSesssionStorageItem("user"));
-        }
-    }, []);
 
     // Update the session storage when the logged in state changes
     useEffect(() => {
@@ -248,6 +294,8 @@ export default function App(props) {
     return (
         <ThemeProvider theme={darkTheme}>
             <CssBaseline>
+                <MessagesDialog open={dialogOpen} msg={dialogMessage} />
+
                 {/* The following component will render only when the backend redirects to the app
                 after the user logs in successfully */}
                 {loginSuccessfulView && (

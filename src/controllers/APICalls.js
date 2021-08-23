@@ -79,7 +79,7 @@ function checkLoginStatus(window) {
     });
 }
 
-export function login() {
+export function login(finalCallback) {
     /**
      * Call the login route
      */
@@ -90,7 +90,11 @@ export function login() {
 
         // Return a Promise that will always close the popup window
         // whether the login was successful or not
-        return checkLoginStatus(popup).finally(() => popup.close());
+        return checkLoginStatus(popup).finally(() => {
+            popup.close();
+
+            finalCallback();
+        });
     });
 }
 

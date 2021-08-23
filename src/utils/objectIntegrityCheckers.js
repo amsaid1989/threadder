@@ -1,3 +1,14 @@
+import { UNTITLED_NAME } from "./generalConstants";
+
+export function checkUserObject(userObj) {
+    return (
+        userObj !== null &&
+        isNotEmpty(userObj) &&
+        containsAllKeys(userObj, ["name", "screenName", "profileImage"]) &&
+        userObj.name !== UNTITLED_NAME
+    );
+}
+
 export function isNotEmpty(obj) {
     return Object.entries(obj).length > 0;
 }
