@@ -10,6 +10,7 @@ import Header from "./components/Header";
 import TweetInput from "./components/TweetInput";
 import ThreadViewer from "./components/ThreadViewer";
 import MessagesDialog from "./components/MessagesDialog";
+import CustomAlert from "./components/CustomAlert";
 import splitTweet from "./controllers/tweetSplitter";
 import { checkUserObject } from "./utils/objectIntegrityCheckers";
 import { login, publishThread } from "./controllers/APICalls";
@@ -77,6 +78,10 @@ export default function App(props) {
     };
 
     /* APP STATE */
+    const [alertVisibility, setAlertVisibility] = useState(false);
+    const [alertSeverity, setAlertSeverity] = useState("error");
+    const [alertMessage, setAlertMessage] = useState("");
+
     // Feedback dialog states
     const [dialogOpen, setDialogOpen] = useState(false);
     const [dialogMessage, setDialogMessage] = useState(
@@ -139,13 +144,17 @@ export default function App(props) {
         login(hideLoginSuccessCallback)
             .then((user) => {
                 if (checkUserObject(user)) {
+                    displayAlert("success", "You are now logged in");
+
                     setLoggedIn(true);
                     setUser(user);
 
                     postLogin();
                 }
             })
-            .catch((err) => console.log(err))
+            .catch((err) => {
+                displayAlert("error", "Login failed");
+            })
             .finally(closeDialog);
     };
     const postLogin = () => {
@@ -230,6 +239,13 @@ export default function App(props) {
             loginHandler();
         }
     };
+    const displayAlert = (level, message) => {
+        setAlertVisibility(true);
+
+        setAlertSeverity(level);
+
+        setAlertMessage(message);
+    };
     /* END EVENT HANDLERS AND FUNCTIONS */
 
     /* SIDE EFFECTS */
@@ -289,11 +305,32 @@ export default function App(props) {
     useEffect(() => {
         setSesssionStorageItem("thread", thread);
     }, [thread]);
+
+    useEffect(() => {
+        if (alertVisibility) {
+            let closeAlertTimeout;
+
+            if (closeAlertTimeout) {
+                clearTimeout(closeAlertTimeout);
+            }
+
+            closeAlertTimeout = setTimeout(() => {
+                setAlertVisibility(false);
+            }, 3000);
+
+            return () => clearTimeout(closeAlertTimeout);
+        }
+    }, [alertVisibility]);
     /* END SIDE EFFECTS */
 
     return (
         <ThemeProvider theme={darkTheme}>
             <CssBaseline>
+                <CustomAlert
+                    visible={alertVisibility}
+                    severity={alertSeverity}
+                    msg={alertMessage}
+                />
                 <MessagesDialog open={dialogOpen} msg={dialogMessage} />
 
                 {/* The following component will render only when the backend redirects to the app
