@@ -1,6 +1,7 @@
 import { useState, useEffect, createRef } from "react";
 import { makeStyles, ThemeProvider } from "@material-ui/core/styles";
 import classNames from "classnames";
+import queryString from "query-string";
 import darkTheme from "./themes/threadder-dark-theme";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import Container from "@material-ui/core/Container";
@@ -13,11 +14,8 @@ import MessagesDialog from "./components/MessagesDialog";
 import CustomAlert from "./components/CustomAlert";
 import splitTweet from "./controllers/tweetSplitter";
 import { checkUserObject } from "./utils/objectIntegrityCheckers";
-import { login, publishThread } from "./controllers/APICalls";
-import {
-    setSesssionStorageItem,
-    getSesssionStorageItem,
-} from "./controllers/sessionStorageWrappers";
+import { login, logout, publishThread } from "./controllers/APICalls";
+import { setStorageItem, getStorageItem } from "./controllers/storageWrappers";
 import {
     UNTITLED_NAME,
     UNTITLED_SCREEN_NAME,
@@ -90,13 +88,13 @@ export default function App(props) {
 
     const [loginSuccessfulView, setLoginSuccessfulView] = useState(false);
     const [loggedIn, setLoggedIn] = useState(
-        getSesssionStorageItem("loggedIn") || false
+        getStorageItem("session", "loggedIn") || false
     );
     const [user, setUser] = useState(
-        getSesssionStorageItem("user") || untitledUser
+        getStorageItem("local", "user") || untitledUser
     );
     const [tweetText, setTweetText] = useState(
-        getSesssionStorageItem("tweetText") || ""
+        getStorageItem("session", "tweetText") || ""
     );
     const [thread, setThread] = useState([]);
     const [editing, setEditing] = useState(true);
@@ -142,7 +140,9 @@ export default function App(props) {
         showDialog("Please wait while we try to log you into your account");
 
         login(hideLoginSuccessCallback)
-            .then((user) => {
+            .then(() => {
+                const user = getStorageItem("local", "user");
+
                 if (checkUserObject(user)) {
                     displayAlert("success", "You are now logged in");
 
@@ -153,7 +153,12 @@ export default function App(props) {
                 }
             })
             .catch((err) => {
-                displayAlert("error", "Login failed");
+                console.log(err);
+
+                const errorMessage =
+                    typeof err === "string" ? err : "Login failed";
+
+                displayAlert("error", errorMessage);
             })
             .finally(closeDialog);
     };
@@ -167,24 +172,33 @@ export default function App(props) {
          * Thread button without logging in, which would
          * start the login sequence.
          */
-        if (getSesssionStorageItem("publishAfterLogin")) {
-            setSesssionStorageItem("publishAfterLogin", false);
+        if (getStorageItem("session", "publishAfterLogin")) {
+            setStorageItem("session", "publishAfterLogin", false);
 
             publishTweets();
         }
     };
-    const finaliseLogout = () => {
+    const logoutHandler = () => {
         /**
-         * A convenience function that resets the loggedIn
-         * and user states to their initial values. It is
-         * used when the page reloads after the login process
-         * when the login fails. It is also passed to the
-         * Header component to be used as part of the click
-         * handler of the logout menu item.
+         * Calls the logout API endpoint and resets the loggedIn
+         * and user states to their initial values.
          */
 
-        setLoggedIn(false);
-        setUser(untitledUser);
+        logout()
+            .then(() => {
+                displayAlert("success", "You are now logged out");
+
+                setLoggedIn(false);
+                setUser(untitledUser);
+            })
+            .catch((err) => {
+                console.log(err);
+
+                const errorMessage =
+                    typeof err === "string" ? err : "Logout failed";
+
+                displayAlert("error", errorMessage);
+            });
     };
     const publishTweets = () => {
         /**
@@ -198,9 +212,20 @@ export default function App(props) {
 
         publishThread(thread)
             .then(() => {
+                displayAlert("success", "Thread published successfully");
+
                 setTweetText("");
             })
-            .catch((err) => console.log(err))
+            .catch((err) => {
+                console.log(err);
+
+                const errorMessage =
+                    typeof err === "string"
+                        ? err
+                        : "Failed to publish your thread";
+
+                displayAlert("error", errorMessage);
+            })
             .finally(closeDialog);
     };
     const showDialog = (message) => {
@@ -234,7 +259,7 @@ export default function App(props) {
         if (loggedIn) {
             publishTweets();
         } else {
-            setSesssionStorageItem("publishAfterLogin", true);
+            setStorageItem("session", "publishAfterLogin", true);
 
             loginHandler();
         }
@@ -255,17 +280,13 @@ export default function App(props) {
     useEffect(() => {
         if (document.location.search !== "") {
             setLoginSuccessfulView(true);
-        }
-    }, []);
 
-    // On page load, if the user data is set in session storage
-    // load the user data and set the user object
-    useEffect(() => {
-        const userObj = getSesssionStorageItem("user");
+            const user = queryString.parse(document.location.search);
 
-        if (checkUserObject(userObj)) {
-            setLoggedIn(true);
-            setUser(getSesssionStorageItem("user"));
+            if (checkUserObject(user)) {
+                setUser(user);
+                setStorageItem("local", "userUpdated", true);
+            }
         }
     }, []);
 
@@ -279,12 +300,12 @@ export default function App(props) {
 
     // Update the session storage when the logged in state changes
     useEffect(() => {
-        setSesssionStorageItem("loggedIn", loggedIn);
+        setStorageItem("session", "loggedIn", loggedIn);
     }, [loggedIn]);
 
     // Update the session storage when the user state changes
     useEffect(() => {
-        setSesssionStorageItem("user", user);
+        setStorageItem("local", "user", user);
     }, [user]);
 
     // When the tweetText is updated, update the thread state
@@ -297,13 +318,13 @@ export default function App(props) {
             setThread(splitTweet(tweetText));
         }
 
-        setSesssionStorageItem("tweetText", tweetText);
+        setStorageItem("session", "tweetText", tweetText);
     }, [tweetText]);
 
     // When the thread is updated, store it in the sessionStorage
     // to ensure it persists across reloads
     useEffect(() => {
-        setSesssionStorageItem("thread", thread);
+        setStorageItem("session", "thread", thread);
     }, [thread]);
 
     useEffect(() => {
@@ -355,8 +376,8 @@ export default function App(props) {
                                 <Header
                                     user={user}
                                     loggedIn={loggedIn}
-                                    setLoggedOutState={finaliseLogout}
                                     login={loginHandler}
+                                    logout={logoutHandler}
                                 />
                             </Grid>
 

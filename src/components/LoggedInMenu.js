@@ -5,7 +5,6 @@ import IconButton from "@material-ui/core/IconButton";
 import Avatar from "@material-ui/core/Avatar";
 import StyledMenu from "./StyledMenu";
 import MenuItem from "@material-ui/core/MenuItem";
-import { logout } from "../controllers/APICalls";
 
 /*
  * The styles and implementation of the menu component that
@@ -74,13 +73,7 @@ export default function LoggedInMenu(props) {
 
         closeMenu();
 
-        logout()
-            .then(() => {
-                props.setLoggedOutState();
-            })
-            .catch((err) => {
-                console.log(err);
-            });
+        props.logout();
     };
     /* END EVENT HANDLERS */
 

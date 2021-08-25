@@ -1,5 +1,5 @@
 import axios from "axios";
-import queryString from "query-string";
+import { getStorageItem, setStorageItem } from "./storageWrappers";
 import { SERVER } from "../utils/generalConstants";
 
 function sendAPIRequest(url, method, data = undefined) {
@@ -17,33 +17,7 @@ function sendAPIRequest(url, method, data = undefined) {
     });
 }
 
-function getWindowSearchParams(window) {
-    /**
-     * Attempts to access the search parameters in the provided
-     * window. If it succeeds, it returns the parsed parameters
-     * as object. It doesn't do anything if it fails.
-     */
-
-    try {
-        const user = queryString.parse(window.location.search);
-
-        return user;
-    } catch {}
-}
-
-function launchLoginPopup(url) {
-    /**
-     * Launches the login sequence in a popup window.
-     */
-
-    return window.open(
-        url,
-        "Login to Twitter",
-        "width=500,height=720,toolbar=no,status=no,menubar=no"
-    );
-}
-
-function checkLoginStatus(window) {
+function checkLoginStatus() {
     /**
      * Checks the progress of the login process in the
      * provided window.
@@ -59,23 +33,21 @@ function checkLoginStatus(window) {
 
     return new Promise((resolve, reject) => {
         checkStatusInterval = setInterval(() => {
-            const user = getWindowSearchParams(window);
-
-            if (user) {
-                // Clear both the timeout and interval
-                // if the login completed successfully
-                clearTimeout(loginTimeout);
+            if (getStorageItem("local", "userUpdated")) {
                 clearInterval(checkStatusInterval);
+                clearTimeout(loginTimeout);
 
-                resolve(user);
+                setStorageItem("local", "userUpdated", false);
+
+                resolve("Login successful");
             }
         }, 1000);
 
         loginTimeout = setTimeout(() => {
             clearInterval(checkStatusInterval);
 
-            reject("Login failed");
-        }, 30000);
+            reject("Login failed because the process timed out");
+        }, 10000);
     });
 }
 
@@ -86,11 +58,15 @@ export function login(finalCallback) {
 
     return sendAPIRequest("/request_token", "get").then((response) => {
         // Start the login process in a popup window
-        const popup = launchLoginPopup(response.data.redirect);
+        const popup = window.open(
+            response.data.redirect,
+            "Login to Twitter",
+            "width=500,height=720"
+        );
 
-        // Return a Promise that will always close the popup window
+        // Return a Promise that attempts to close the popup window
         // whether the login was successful or not
-        return checkLoginStatus(popup).finally(() => {
+        return checkLoginStatus().finally(() => {
             popup.close();
 
             finalCallback();

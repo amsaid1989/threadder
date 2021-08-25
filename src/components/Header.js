@@ -46,10 +46,7 @@ export default function Header(props) {
                     Threadder
                 </Typography>
                 {props.loggedIn ? (
-                    <LoggedInMenu
-                        user={props.user}
-                        setLoggedOutState={props.setLoggedOutState}
-                    />
+                    <LoggedInMenu user={props.user} logout={props.logout} />
                 ) : (
                     logInBtn
                 )}
