@@ -1,4 +1,4 @@
-import { useState, useEffect, createRef } from "react";
+import { useState, useEffect, useCallback, createRef } from "react";
 import { makeStyles, ThemeProvider } from "@material-ui/core/styles";
 import classNames from "classnames";
 import queryString from "query-string";
@@ -86,12 +86,11 @@ export default function App(props) {
         "This is an empty dialog"
     );
 
-    const [loginSuccessfulView, setLoginSuccessfulView] = useState(false);
     const [loggedIn, setLoggedIn] = useState(
         getStorageItem("session", "loggedIn") || false
     );
     const [user, setUser] = useState(
-        getStorageItem("local", "user") || untitledUser
+        getStorageItem("session", "user") || untitledUser
     );
     const [tweetText, setTweetText] = useState(
         getStorageItem("session", "tweetText") || ""
@@ -127,30 +126,12 @@ export default function App(props) {
 
         setEditing(!editing);
     };
-    const hideLoginSuccessCallback = () => {
-        /**
-         * Sets the state to hide the login success view that
-         * shows in the login popup window. It is intended to
-         * be passed as the callback to the login API call.
-         */
-
-        setLoginSuccessfulView(false);
-    };
     const loginHandler = () => {
         showDialog("Please wait while we try to log you into your account");
 
-        login(hideLoginSuccessCallback)
-            .then(() => {
-                const user = getStorageItem("local", "user");
-
-                if (checkUserObject(user)) {
-                    displayAlert("success", "You are now logged in");
-
-                    setLoggedIn(true);
-                    setUser(user);
-
-                    postLogin();
-                }
+        login()
+            .then((response) => {
+                document.location.href = response.data.redirect;
             })
             .catch((err) => {
                 console.log(err);
@@ -161,22 +142,6 @@ export default function App(props) {
                 displayAlert("error", errorMessage);
             })
             .finally(closeDialog);
-    };
-    const postLogin = () => {
-        /**
-         * Checks if the thread needs to be published once
-         * the login is successful. If it does, then it
-         * publishes it.
-         *
-         * This happens when the user clicks the Publish
-         * Thread button without logging in, which would
-         * start the login sequence.
-         */
-        if (getStorageItem("session", "publishAfterLogin")) {
-            setStorageItem("session", "publishAfterLogin", false);
-
-            publishTweets();
-        }
     };
     const logoutHandler = () => {
         /**
@@ -200,7 +165,7 @@ export default function App(props) {
                 displayAlert("error", errorMessage);
             });
     };
-    const publishTweets = () => {
+    const publishTweets = useCallback(() => {
         /**
          * A helper function that handles calling the function
          * that sends the thread to the backend and clears the
@@ -227,7 +192,23 @@ export default function App(props) {
                 displayAlert("error", errorMessage);
             })
             .finally(closeDialog);
-    };
+    }, [thread]);
+    const postLogin = useCallback(() => {
+        /**
+         * Checks if the thread needs to be published once
+         * the login is successful. If it does, then it
+         * publishes it.
+         *
+         * This happens when the user clicks the Publish
+         * Thread button without logging in, which would
+         * start the login sequence.
+         */
+        if (getStorageItem("session", "publishAfterLogin")) {
+            setStorageItem("session", "publishAfterLogin", false);
+
+            publishTweets();
+        }
+    }, [publishTweets]);
     const showDialog = (message) => {
         /**
          * Opens the modal dialog with the specified message.
@@ -274,21 +255,41 @@ export default function App(props) {
     /* END EVENT HANDLERS AND FUNCTIONS */
 
     /* SIDE EFFECTS */
-    // When the backend redirects to the app, this will set the
-    // state appropriately to only show a success message rather
-    // than the app components
+    // Once a login attempt is complete and the app reloads, check
+    // the session store to display the appropriate alert depending
+    // on whether the attempt was successful or not
     useEffect(() => {
-        if (document.location.search !== "") {
-            setLoginSuccessfulView(true);
+        if (getStorageItem("session", "loginSuccessMessage")) {
+            setStorageItem("session", "loginSuccessMessage", false);
 
-            const user = queryString.parse(document.location.search);
+            displayAlert("success", "You are now logged in");
+        } else if (getStorageItem("session", "loginFailMessage")) {
+            setStorageItem("session", "loginFailMessage", false);
 
-            if (checkUserObject(user)) {
-                setUser(user);
-                setStorageItem("local", "userUpdated", true);
-            }
+            displayAlert("error", "Login failed");
         }
     }, []);
+
+    // When the backend redirects to the app, set the user to logged
+    // in if the process was successful. It also sets some values in
+    // the session storage for the alerts that will need to be displayed
+    // in the UI once the login attempt is complete
+    useEffect(() => {
+        if (document.location.search !== "") {
+            const user = queryString.parse(document.location.search);
+
+            document.location.search = "";
+
+            if (checkUserObject(user)) {
+                setLoggedIn(true);
+                setUser(user);
+
+                setStorageItem("session", "loginSuccessMessage", true);
+            } else {
+                setStorageItem("session", "loginFailMessage", true);
+            }
+        }
+    }, [postLogin]);
 
     // Give focus to the tweet input area on page load and whenever
     // the tweet input is re-rendered
@@ -305,7 +306,7 @@ export default function App(props) {
 
     // Update the session storage when the user state changes
     useEffect(() => {
-        setStorageItem("local", "user", user);
+        setStorageItem("session", "user", user);
     }, [user]);
 
     // When the tweetText is updated, update the thread state
@@ -352,90 +353,77 @@ export default function App(props) {
                     severity={alertSeverity}
                     msg={alertMessage}
                 />
+
                 <MessagesDialog open={dialogOpen} msg={dialogMessage} />
 
-                {/* The following component will render only when the backend redirects to the app
-                after the user logs in successfully */}
-                {loginSuccessfulView && (
-                    <Container className={classes.root}>
-                        <h2 className={classes.loggedInSuccess}>
-                            Logged in successfully
-                        </h2>
-                    </Container>
-                )}
-
-                {!loginSuccessfulView && (
-                    <Container className={classes.root}>
-                        <Grid
-                            container
-                            spacing={3}
-                            className={classes.gridContainer}
-                        >
-                            {/* App Header grid item */}
-                            <Grid item xs={12} className={classes.appHeader}>
-                                <Header
-                                    user={user}
-                                    loggedIn={loggedIn}
-                                    login={loginHandler}
-                                    logout={logoutHandler}
-                                />
-                            </Grid>
-
-                            {/* Grid item that holds both TweetInput and the ThreadViewer */}
-                            <Grid
-                                item
-                                xs={12}
-                                className={classNames(
-                                    classes.appView,
-                                    classes.hiddenOverflow
-                                )}
-                            >
-                                {/* TweetInput item which gets hidden in mobile views if not editing */}
-                                <Hidden smDown={!editing}>
-                                    <Grid
-                                        item
-                                        xs={12}
-                                        md={7}
-                                        className={classNames(
-                                            classes.mainArea,
-                                            classes.hiddenOverflow
-                                        )}
-                                    >
-                                        <TweetInput
-                                            tweetText={tweetText}
-                                            handleTweetInput={updateTweet}
-                                            thread={thread}
-                                            viewThreadHandler={toggleEditing}
-                                            ref={tweetInputRef}
-                                        />
-                                    </Grid>
-                                </Hidden>
-
-                                {/* ThreadViewer item which gets hidden in mobile views when editing */}
-                                <Hidden smDown={editing}>
-                                    <Grid
-                                        item
-                                        xs={12}
-                                        md={5}
-                                        className={classNames(
-                                            classes.mainArea,
-                                            classes.hiddenOverflow
-                                        )}
-                                    >
-                                        <ThreadViewer
-                                            user={user}
-                                            thread={thread}
-                                            editThreadHandler={toggleEditing}
-                                            publishHandler={
-                                                publishThreadHandler
-                                            }
-                                        />
-                                    </Grid>
-                                </Hidden>
-                            </Grid>
+                <Container className={classes.root}>
+                    <Grid
+                        container
+                        spacing={3}
+                        className={classes.gridContainer}
+                    >
+                        {/* App Header grid item */}
+                        <Grid item xs={12} className={classes.appHeader}>
+                            <Header
+                                user={user}
+                                loggedIn={loggedIn}
+                                login={loginHandler}
+                                logout={logoutHandler}
+                            />
                         </Grid>
-                    </Container>
-                )}
+
+                        {/* Grid item that holds both TweetInput and the ThreadViewer */}
+                        <Grid
+                            item
+                            xs={12}
+                            className={classNames(
+                                classes.appView,
+                                classes.hiddenOverflow
+                            )}
+                        >
+                            {/* TweetInput item which gets hidden in mobile views if not editing */}
+                            <Hidden smDown={!editing}>
+                                <Grid
+                                    item
+                                    xs={12}
+                                    md={7}
+                                    className={classNames(
+                                        classes.mainArea,
+                                        classes.hiddenOverflow
+                                    )}
+                                >
+                                    <TweetInput
+                                        tweetText={tweetText}
+                                        handleTweetInput={updateTweet}
+                                        thread={thread}
+                                        viewThreadHandler={toggleEditing}
+                                        ref={tweetInputRef}
+                                    />
+                                </Grid>
+                            </Hidden>
+
+                            {/* ThreadViewer item which gets hidden in mobile views when editing */}
+                            <Hidden smDown={editing}>
+                                <Grid
+                                    item
+                                    xs={12}
+                                    md={5}
+                                    className={classNames(
+                                        classes.mainArea,
+                                        classes.hiddenOverflow
+                                    )}
+                                >
+                                    <ThreadViewer
+                                        user={user}
+                                        thread={thread}
+                                        editThreadHandler={toggleEditing}
+                                        publishHandler={publishThreadHandler}
+                                    />
+                                </Grid>
+                            </Hidden>
+                        </Grid>
+                    </Grid>
+                </Container>
             </CssBaseline>
         </ThemeProvider>
     );
