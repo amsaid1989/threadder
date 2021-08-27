@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import classNames from "classnames";
 import Container from "@material-ui/core/Container";
@@ -6,6 +6,12 @@ import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
 import StyledButton from "./StyledButton";
 import Hidden from "@material-ui/core/Hidden";
+import ClickAwayListener from "@material-ui/core/ClickAwayListener";
+import "emoji-mart/css/emoji-mart.css";
+import "./emojiPicker.css";
+import data from "emoji-mart/data/twitter.json";
+import { NimblePicker } from "emoji-mart";
+import InputToolbar from "./InputToolbar";
 
 /*
  * The styles and implementation of the tweet input component.
@@ -32,7 +38,10 @@ const useStyles = makeStyles((theme) => ({
         flex: 0,
     },
     textareaContainer: {
+        display: "flex",
+        flexFlow: "column nowrap",
         padding: "1.5em",
+        paddingBottom: "0.55em",
         backgroundColor: theme.palette.primary.main,
     },
     threadTextarea: {
@@ -60,10 +69,38 @@ const useStyles = makeStyles((theme) => ({
     statsText: {
         color: theme.palette.primary.contrastText2,
     },
+    emojiPicker: {
+        position: "absolute",
+    },
 }));
 
 const TweetInput = React.forwardRef((props, ref) => {
     const classes = useStyles();
+
+    const [pickerOpen, setPickerOpen] = useState(false);
+
+    const handlePickerClick = (event) => {
+        /**
+         * Handles the user click on the button the toggles
+         * the emoji picker.
+         */
+
+        // Because the span that contains the button and the
+        // picker has an onClick handler that closes the
+        // picker, we have to stop the event propagation
+        // to stop the click event from being passed from
+        // the button to the its parent. Otherwise, the picker
+        // won't open at all
+        event.stopPropagation();
+
+        setPickerOpen((prevState) => !prevState);
+    };
+
+    const handleClickAway = (event) => {
+        if (event.target === event.currentTarget) {
+            setPickerOpen(false);
+        }
+    };
 
     return (
         <Grid
@@ -71,7 +108,7 @@ const TweetInput = React.forwardRef((props, ref) => {
             spacing={2}
             className={classNames(classes.root, classes.fullHeight)}
         >
-            {/* GRID ITEM 01: Tweet Input Textarea */}
+            {/* GRID ITEM 01: Tweet Input Textarea and toolbar */}
             <Grid
                 item
                 xs={12}
@@ -88,15 +125,41 @@ const TweetInput = React.forwardRef((props, ref) => {
                     )}
                 >
                     <textarea
+                        // autoFocus
                         className={classNames(
                             classes.threadTextarea,
                             classes.fullHeight
                         )}
                         onChange={props.handleTweetInput}
+                        onSelect={props.handleCursorPositionChange}
                         placeholder="Type your tweet here..."
                         value={props.tweetText}
                         ref={ref}
                     />
+
+                    <ClickAwayListener onClickAway={handleClickAway}>
+                        <span
+                            style={{ position: "relative" }}
+                            onClick={handleClickAway}
+                            id="input-toolbar"
+                        >
+                            {pickerOpen && (
+                                <NimblePicker
+                                    set="twitter"
+                                    data={data}
+                                    title=""
+                                    emoji=""
+                                    showPreview={false}
+                                    perLine={8}
+                                    onSelect={props.handleEmojiPicking}
+                                />
+                            )}
+                            <InputToolbar
+                                onClick={handleClickAway}
+                                emojiPickerHandler={handlePickerClick}
+                            />
+                        </span>
+                    </ClickAwayListener>
                 </Container>
             </Grid>
 

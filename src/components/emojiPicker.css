@@ -1,0 +1,17 @@
+.emoji-mart {
+    position: absolute !important;
+    bottom: 2em !important;
+}
+
+.emoji-mart-bar .emoji-mart-preview {
+    height: 40px !important;
+}
+
+.emoji-mart-preview-skins {
+    top: 10px !important;
+    transform: translateY(0) !important;
+}
+
+.emoji-mart-preview-emoji span.emoji-mart-emoji {
+    padding: 0 !important;
+}

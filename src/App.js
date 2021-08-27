@@ -95,6 +95,10 @@ export default function App(props) {
     const [tweetText, setTweetText] = useState(
         getStorageItem("session", "tweetText") || ""
     );
+    const [cursorPosition, setCursorPosition] = useState({
+        start: tweetText.length,
+        end: tweetText.length,
+    });
     const [thread, setThread] = useState([]);
     const [editing, setEditing] = useState(true);
     /* END APP STATE */
@@ -116,6 +120,29 @@ export default function App(props) {
         const text = event.target.value;
 
         setTweetText(text);
+
+        setCursorPosition({
+            start: event.target.selectionStart,
+            end: event.target.selectionEnd,
+        });
+    };
+    const updateCursorPosition = (event) => {
+        const start = event.target.selectionStart;
+        const end = event.target.selectionEnd;
+
+        setCursorPosition({ start, end });
+    };
+    const insertEmoji = (emoji) => {
+        const beforeEmoji = tweetText.slice(0, cursorPosition.start);
+        const afterEmoji = tweetText.slice(cursorPosition.end);
+
+        const updatedText = beforeEmoji + emoji.native + afterEmoji;
+
+        const newPos = cursorPosition.start + emoji.native.length;
+
+        setCursorPosition({ start: newPos, end: newPos });
+
+        setTweetText(updatedText);
     };
     const toggleEditing = () => {
         /**
@@ -291,6 +318,19 @@ export default function App(props) {
         }
     }, [postLogin]);
 
+    // On every update, make sure that the TweetInput area has its
+    // cursor in the correct place. This is to ensure that, when the
+    // user adds an emoji in the middle of any text that already
+    // exists, the cursor doesn't jump to the end
+    useEffect(() => {
+        if (tweetInputRef.current) {
+            tweetInputRef.current.setSelectionRange(
+                cursorPosition.start,
+                cursorPosition.end
+            );
+        }
+    });
+
     // Give focus to the tweet input area on page load and whenever
     // the tweet input is re-rendered
     useEffect(() => {
@@ -395,6 +435,10 @@ export default function App(props) {
                                     <TweetInput
                                         tweetText={tweetText}
                                         handleTweetInput={updateTweet}
+                                        handleCursorPositionChange={
+                                            updateCursorPosition
+                                        }
+                                        handleEmojiPicking={insertEmoji}
                                         thread={thread}
                                         viewThreadHandler={toggleEditing}
                                         ref={tweetInputRef}
