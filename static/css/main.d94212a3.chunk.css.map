@@ -1,1 +1,0 @@
-{"version":3,"sources":["webpack://src/styles/index.css"],"names":[],"mappings":"AAAA,KACC,UAAW,CAEX,SACD,CAEA,WAJC,aAOD,CAHA,MAEC,gBACD","file":"main.d94212a3.chunk.css","sourcesContent":["body {\n\twidth: 100%;\n\tmargin: 0 auto;\n\tpadding: 0;\n}\n\n#root {\n\tmargin: 0 auto;\n\tmax-width: 1920px;\n}\n"]}

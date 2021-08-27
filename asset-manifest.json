@@ -1,20 +1,23 @@
 {
   "files": {
-    "main.css": "/threadder/static/css/main.d94212a3.chunk.css",
-    "main.js": "/threadder/static/js/main.4db23e8c.chunk.js",
-    "main.js.map": "/threadder/static/js/main.4db23e8c.chunk.js.map",
+    "main.css": "/threadder/static/css/main.d8e1ca40.chunk.css",
+    "main.js": "/threadder/static/js/main.e35abb68.chunk.js",
+    "main.js.map": "/threadder/static/js/main.e35abb68.chunk.js.map",
     "runtime-main.js": "/threadder/static/js/runtime-main.73fd8acf.js",
     "runtime-main.js.map": "/threadder/static/js/runtime-main.73fd8acf.js.map",
-    "static/js/2.86525d10.chunk.js": "/threadder/static/js/2.86525d10.chunk.js",
-    "static/js/2.86525d10.chunk.js.map": "/threadder/static/js/2.86525d10.chunk.js.map",
+    "static/css/2.87f20fe7.chunk.css": "/threadder/static/css/2.87f20fe7.chunk.css",
+    "static/js/2.163e7526.chunk.js": "/threadder/static/js/2.163e7526.chunk.js",
+    "static/js/2.163e7526.chunk.js.map": "/threadder/static/js/2.163e7526.chunk.js.map",
     "index.html": "/threadder/index.html",
-    "static/css/main.d94212a3.chunk.css.map": "/threadder/static/css/main.d94212a3.chunk.css.map",
-    "static/js/2.86525d10.chunk.js.LICENSE.txt": "/threadder/static/js/2.86525d10.chunk.js.LICENSE.txt"
+    "static/css/2.87f20fe7.chunk.css.map": "/threadder/static/css/2.87f20fe7.chunk.css.map",
+    "static/css/main.d8e1ca40.chunk.css.map": "/threadder/static/css/main.d8e1ca40.chunk.css.map",
+    "static/js/2.163e7526.chunk.js.LICENSE.txt": "/threadder/static/js/2.163e7526.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
     "static/js/runtime-main.73fd8acf.js",
-    "static/js/2.86525d10.chunk.js",
-    "static/css/main.d94212a3.chunk.css",
-    "static/js/main.4db23e8c.chunk.js"
+    "static/css/2.87f20fe7.chunk.css",
+    "static/js/2.163e7526.chunk.js",
+    "static/css/main.d8e1ca40.chunk.css",
+    "static/js/main.e35abb68.chunk.js"
   ]
 }
