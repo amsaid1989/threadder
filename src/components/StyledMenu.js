@@ -1,7 +1,7 @@
 import { makeStyles } from "@material-ui/core/styles";
 import Menu from "@material-ui/core/Menu";
 
-/*
+/**
  * Component that applies custom styling to Material UI's
  * Menu component. It passes all of its props to the
  * enclosed Menu component.

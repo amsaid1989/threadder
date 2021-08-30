@@ -29,10 +29,6 @@ const useStyles = makeStyles((theme) => ({
          */
         height: "100vh",
         maxHeight: "100vh",
-        [theme.breakpoints.down("sm")]: {
-            height: "93vh",
-            maxHeight: "93vh",
-        },
     },
     gridContainer: {
         /**
@@ -438,7 +434,7 @@ export default function App(props) {
                                         handleCursorPositionChange={
                                             updateCursorPosition
                                         }
-                                        handleEmojiPicking={insertEmoji}
+                                        pickEmojiHandler={insertEmoji}
                                         thread={thread}
                                         viewThreadHandler={toggleEditing}
                                         ref={tweetInputRef}

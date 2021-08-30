@@ -2,7 +2,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import classNames from "classnames";
 import Button from "@material-ui/core/Button";
 
-/*
+/**
  * A component that applies custom styling to Material UI's
  * default Button component. It passes all the props added
  * to it to the enclosed Button component.

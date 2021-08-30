@@ -6,7 +6,7 @@ import StyledButton from "./StyledButton";
 import Hidden from "@material-ui/core/Hidden";
 import Tweet from "./Tweet";
 
-/*
+/**
  * The styles and implementation of the Thread Viewer component.
  * This component will show the tweets passed from the App
  * component using the Tweet component.
