@@ -1,0 +1,7 @@
+name: Threadder deploy
+on: [push]
+jobs:
+  Deploy Threadder:
+    runs-on: ubuntu-latest
+    steps:
+      - run: yarn deploy
