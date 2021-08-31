@@ -63,7 +63,7 @@ export default function InputToolbar(props) {
                             className={classes.toolbarButton}
                             size="small"
                             onClick={handlePickerClick}
-                            title="Add emoji"
+                            title="Emoji"
                         >
                             <EmojiEmotionsIcon />
                         </IconButton>
@@ -73,14 +73,16 @@ export default function InputToolbar(props) {
             <IconButton
                 className={classes.toolbarButton}
                 size="small"
-                title="Split thread"
+                onClick={props.splitTweetHandler}
+                title="Split"
             >
                 <ViewAgendaIcon />
             </IconButton>
             <IconButton
                 className={classes.toolbarButton}
                 size="small"
-                title="Clear thread"
+                onClick={props.clearTweetHandler}
+                title="Clear"
             >
                 <BackspaceIcon />
             </IconButton>

@@ -16,6 +16,7 @@ import splitTweet from "./controllers/tweetSplitter";
 import { checkUserObject } from "./utils/objectIntegrityCheckers";
 import { login, logout, publishThread } from "./controllers/APICalls";
 import { setStorageItem, getStorageItem } from "./controllers/storageWrappers";
+import { insertIntoText } from "./controllers/textManip";
 import {
     UNTITLED_NAME,
     UNTITLED_SCREEN_NAME,
@@ -128,17 +129,25 @@ export default function App(props) {
 
         setCursorPosition({ start, end });
     };
-    const insertEmoji = (emoji) => {
-        const beforeEmoji = tweetText.slice(0, cursorPosition.start);
-        const afterEmoji = tweetText.slice(cursorPosition.end);
-
-        const updatedText = beforeEmoji + emoji.native + afterEmoji;
-
-        const newPos = cursorPosition.start + emoji.native.length;
+    const insertTextAtCursor = (text) => {
+        const [updatedText, newPos] = insertIntoText(
+            tweetText,
+            cursorPosition,
+            text
+        );
 
         setCursorPosition({ start: newPos, end: newPos });
 
         setTweetText(updatedText);
+    };
+    const insertEmoji = (emoji) => {
+        insertTextAtCursor(emoji.native);
+    };
+    const addSplit = () => {
+        insertTextAtCursor("\n(---)\n");
+    };
+    const clearTweet = () => {
+        setTweetText("");
     };
     const toggleEditing = () => {
         /**
@@ -435,6 +444,8 @@ export default function App(props) {
                                             updateCursorPosition
                                         }
                                         pickEmojiHandler={insertEmoji}
+                                        splitTweetHandler={addSplit}
+                                        clearTweetHandler={clearTweet}
                                         thread={thread}
                                         viewThreadHandler={toggleEditing}
                                         ref={tweetInputRef}

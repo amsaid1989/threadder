@@ -106,7 +106,11 @@ const TweetInput = React.forwardRef((props, ref) => {
                         ref={ref}
                     />
 
-                    <InputToolbar pickEmojiHandler={props.pickEmojiHandler} />
+                    <InputToolbar
+                        pickEmojiHandler={props.pickEmojiHandler}
+                        splitTweetHandler={props.splitTweetHandler}
+                        clearTweetHandler={props.clearTweetHandler}
+                    />
                 </Container>
             </Grid>
 
