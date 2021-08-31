@@ -4,4 +4,5 @@ jobs:
   Deploy_Threadder:
     runs-on: ubuntu-latest
     steps:
-      - run: cd ../../ && yarn deploy
+      - run: ls -al ../
+      - run: cd ../ && yarn deploy
