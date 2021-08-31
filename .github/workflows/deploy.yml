@@ -1,7 +1,7 @@
 name: Threadder deploy
 on: [push]
 jobs:
-  Deploy Threadder:
+  Deploy_Threadder:
     runs-on: ubuntu-latest
     steps:
       - run: yarn deploy
