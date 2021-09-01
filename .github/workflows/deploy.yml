@@ -13,7 +13,9 @@ jobs:
         uses: actions/setup-node@v2
       - name: Install packages
         run: yarn
-      - name: Delpoy new version
-        run: yarn deploy
-          with:
-            repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Deploy new version
+        run: |
+          git remote set-url origin https://git:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
+          yarn deploy -- -u "Abdelrahman <said.abdelrahman89@gmail.com>"
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
