@@ -6,18 +6,14 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [12.x, 14.x, 16.x]
-
     steps:
       - name: Checkout repository code
         uses: actions/checkout@v2
-      - name: Setup Node.js ${{ matrix.node-version }}
+      - name: Setup Node.js
         uses: actions/setup-node@v2
-        with:
-          node-version: ${{ matrix.node-version }}
       - name: Install packages
         run: yarn
       - name: Delpoy new version
         run: yarn deploy
+          with:
+            repo-token: ${{ secrets.GITHUB_TOKEN }}
