@@ -18,6 +18,6 @@ jobs:
       - name: Deploy new version
         run: |
           git remote set-url origin https://git:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
-          gh-pages -d build -u "Abdelrahman <said.abdelrahman89@gmail.com>"
+          yarn run gh-pages -d build -u "Abdelrahman <said.abdelrahman89@gmail.com>"
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
