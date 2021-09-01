@@ -329,10 +329,8 @@ export default function App(props) {
     // exists, the cursor doesn't jump to the end
     useEffect(() => {
         if (tweetInputRef.current) {
-            tweetInputRef.current.setSelectionRange(
-                cursorPosition.start,
-                cursorPosition.end
-            );
+            tweetInputRef.current.selectionStart = cursorPosition.start;
+            tweetInputRef.current.selectionEnd = cursorPosition.end;
         }
     });
 
