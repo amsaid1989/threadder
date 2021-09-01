@@ -13,9 +13,11 @@ jobs:
         uses: actions/setup-node@v2
       - name: Install packages
         run: yarn
+      - name: Build new version
+        run: yarn build
       - name: Deploy new version
         run: |
           git remote set-url origin https://git:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
-          yarn deploy -- -u "Abdelrahman <said.abdelrahman89@gmail.com>"
+          gh-pages -d build -u "Abdelrahman <said.abdelrahman89@gmail.com>"
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
