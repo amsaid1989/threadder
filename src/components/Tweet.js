@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import classNames from "classnames";
 import Grid from "@material-ui/core/Grid";
 import Avatar from "@material-ui/core/Avatar";
+import { TWEET_LENGTH } from "../utils/generalConstants";
 
 /*
  * The style and implementation of the Tweet component which is used
@@ -84,7 +86,7 @@ const useStyles = makeStyles((theme) => ({
         margin: 0,
         marginTop: "0.25em",
 
-        /*
+        /**
          * This ensures that any line breaks or extra white spaces added
          * by the user in the TweetInput component is not discarded when
          * displayed in the Tweet component.
@@ -92,6 +94,13 @@ const useStyles = makeStyles((theme) => ({
         whiteSpace: "pre-wrap",
 
         overflowWrap: "break-word",
+    },
+    tweetLength: {
+        width: "100%",
+        textAlign: "left",
+        color: theme.palette.secondary.main,
+        margin: 0,
+        marginTop: "0.5em",
     },
     hiddenOverflow: {
         overflow: "hidden",
@@ -101,8 +110,35 @@ const useStyles = makeStyles((theme) => ({
 export default function Tweet(props) {
     const classes = useStyles();
 
+    const [lengthVisibility, setLengthVisibility] = useState("none");
+
+    const mouseOverHandler = () => {
+        /**
+         * Event handler that shows the length of the
+         * current tweet when user hovers over it with
+         * the mouse
+         */
+
+        setLengthVisibility("block");
+    };
+
+    const mouseOutHandler = () => {
+        /**
+         * Event handler that hides the length of the
+         * current tweet when mouse cursor leaves the
+         * tweet area
+         */
+
+        setLengthVisibility("none");
+    };
+
     return (
-        <Grid container className={classes.root}>
+        <Grid
+            container
+            className={classes.root}
+            onMouseOver={mouseOverHandler}
+            onMouseOut={mouseOutHandler}
+        >
             <Grid
                 container
                 className={classNames(
@@ -183,6 +219,16 @@ export default function Tweet(props) {
                         )}
                     >
                         {props.text}
+                    </p>
+                </Grid>
+                <Grid item style={{ display: lengthVisibility }}>
+                    <p
+                        className={classNames(
+                            classes.resetFont,
+                            classes.tweetLength
+                        )}
+                    >
+                        {`${props.text.length}/${TWEET_LENGTH}`}
                     </p>
                 </Grid>
             </Grid>
