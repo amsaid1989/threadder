@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import classNames from "classnames";
 import Grid from "@material-ui/core/Grid";
 import Avatar from "@material-ui/core/Avatar";
-import { TWEET_LENGTH } from "../utils/generalConstants";
+import TweetToolbar from "./TweetToolbar";
+import Hidden from "@material-ui/core/Hidden";
+import { getColumn, getRow } from "../controllers/gridPlacement";
 
-/*
+/**
  * The style and implementation of the Tweet component which is used
  * by the ThreadViewer to display the split tweets in a format that
  * is familiar to a Twitter user.
@@ -21,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
          * multiple tweets displayed. If the tweet is the last one, or the
          * only one, in the thread, then no margin is added.
          */
-        marginBottom: "1.5em",
+        marginBottom: "1em",
         flexFlow: "row nowrap",
         "&:last-child": {
             marginBottom: 0,
@@ -95,12 +97,20 @@ const useStyles = makeStyles((theme) => ({
 
         overflowWrap: "break-word",
     },
-    tweetLength: {
+    imageGallery: {
         width: "100%",
-        textAlign: "left",
-        color: theme.palette.secondary.main,
-        margin: 0,
-        marginTop: "0.5em",
+        height: "16em",
+        marginTop: "0.4em",
+        borderRadius: "0.5em",
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr",
+        gridTemplateRows: "1fr 1fr",
+        gridGap: "0.25em",
+    },
+    image: {
+        width: "100%",
+        height: "100%",
+        objectFit: "cover",
     },
     hiddenOverflow: {
         overflow: "hidden",
@@ -110,35 +120,105 @@ const useStyles = makeStyles((theme) => ({
 export default function Tweet(props) {
     const classes = useStyles();
 
-    const [lengthVisibility, setLengthVisibility] = useState("none");
+    const supportedImageTypes = [".png", ".jpg", ".jpeg", ".gif", ".webp"];
 
-    const mouseOverHandler = () => {
-        /**
-         * Event handler that shows the length of the
-         * current tweet when user hovers over it with
-         * the mouse
-         */
+    const [images, setImages] = useState([]);
+    const [disableAddImages, setDisableAddImages] = useState(false);
 
-        setLengthVisibility("block");
+    const addImages = (imagesToAdd) => {
+        const updatedImages = [...images, ...imagesToAdd];
+
+        if (exceedsAllowedLimits(updatedImages)) {
+            props.setAlertData(
+                "error",
+                "A maximum of 1 GIF or 4 images can be added"
+            );
+
+            return;
+        }
+
+        if (!allFilesAreSupported(updatedImages)) {
+            props.setAlertData(
+                "error",
+                `Only the following file types are supported: ${supportedImageTypes.join(
+                    ", "
+                )}`
+            );
+
+            return;
+        }
+
+        setImages(updatedImages);
     };
 
-    const mouseOutHandler = () => {
+    const allFilesAreSupported = (files) => {
         /**
-         * Event handler that hides the length of the
-         * current tweet when mouse cursor leaves the
-         * tweet area
+         * Tests all files in an array to make sure that they all
+         * are supported image types.
          */
 
-        setLengthVisibility("none");
+        // Clean the file extensions from the dot at the beginning
+        // and prefix the extension with the string 'image/' because
+        // that is how the image type appears in the file URL as
+        // formatted by the FileReader
+        const extensions = supportedImageTypes.map(
+            (type) => `image/${type.slice(1)}`
+        );
+
+        return files.every((file) => {
+            return extensions.some((ext) => file.includes(ext));
+        });
     };
+
+    const exceedsAllowedLimits = (files) => {
+        /**
+         * Tests all the files in the array to test if it exceeds
+         * the maximum number of images allowed by Twitter (currently,
+         * 1 GIF or 4 images).
+         *
+         * Returns true if the limits are exceeded, false otherwise.
+         */
+
+        return (
+            files.length > 4 ||
+            (files.some((file) => file.includes("image/gif")) &&
+                files.length > 1)
+        );
+    };
+
+    const imageElements = images.map((image, index, arr) => {
+        const [colStart, colEnd] = getColumn(index, arr.length);
+        const [rowStart, rowEnd] = getRow(index, arr.length);
+
+        return (
+            <img
+                key={image}
+                src={image}
+                alt=""
+                className={classes.image}
+                // Specify the column and row placement of each image
+                // in the grid, so that images fill the entire grid
+                // even if not all of the maximum of 4 images are added
+                style={{
+                    gridColumn: `${colStart} / ${colEnd}`,
+                    gridRow: `${rowStart} / ${rowEnd}`,
+                }}
+            />
+        );
+    });
+
+    useEffect(() => {
+        // Disables the add images button once the limits defined by
+        // Twitter are reached
+        const shouldDisable =
+            images.length === 4 ||
+            (images.length === 1 && images[0].includes("image/gif"));
+
+        setDisableAddImages(shouldDisable);
+    }, [images]);
 
     return (
-        <Grid
-            container
-            className={classes.root}
-            onMouseOver={mouseOverHandler}
-            onMouseOut={mouseOutHandler}
-        >
+        <Grid container className={classes.root}>
             <Grid
                 container
                 className={classNames(
@@ -221,15 +301,27 @@ export default function Tweet(props) {
                         {props.text}
                     </p>
                 </Grid>
-                <Grid item style={{ display: lengthVisibility }}>
-                    <p
+
+                <Hidden xsUp={images.length === 0}>
+                    <Grid
+                        item
                         className={classNames(
-                            classes.resetFont,
-                            classes.tweetLength
+                            classes.imageGallery,
+                            classes.hiddenOverflow
                         )}
                     >
-                        {`${props.text.length}/${TWEET_LENGTH}`}
-                    </p>
+                        {imageElements}
+                    </Grid>
+                </Hidden>
+
+                <Grid item>
+                    <TweetToolbar
+                        imageTypes={supportedImageTypes}
+                        length={props.text.length}
+                        addDisabled={disableAddImages}
+                        setAlertData={props.setAlertData}
+                        addImagesHandler={addImages}
+                    />
                 </Grid>
             </Grid>
         </Grid>

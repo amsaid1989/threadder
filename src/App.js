@@ -56,11 +56,6 @@ const useStyles = makeStyles((theme) => ({
     hiddenOverflow: {
         overflow: "hidden",
     },
-    loggedInSuccess: {
-        color: theme.palette.primary.contrastText,
-        textAlign: "center",
-        fontWeight: "normal",
-    },
 }));
 
 export default function App(props) {
@@ -124,12 +119,24 @@ export default function App(props) {
         });
     };
     const updateCursorPosition = (event) => {
+        /**
+         * Updates the cursor position state whenever the user
+         * changes the cursor position in the tweet input
+         * textarea.
+         */
+
         const start = event.target.selectionStart;
         const end = event.target.selectionEnd;
 
         setCursorPosition({ start, end });
     };
     const insertTextAtCursor = (text) => {
+        /**
+         * Inserts any text passed to it at the current cursor
+         * position in the tweet text displayed in the input
+         * area.
+         */
+
         const [updatedText, newPos] = insertIntoText(
             tweetText,
             cursorPosition,
@@ -141,12 +148,28 @@ export default function App(props) {
         setTweetText(updatedText);
     };
     const insertEmoji = (emoji) => {
+        /**
+         * Event handler for the emoji picker. It inserts the
+         * selected emoji at the current cursor position in
+         * the tweet text.
+         */
+
         insertTextAtCursor(emoji.native);
     };
     const addSplit = () => {
+        /**
+         * Event handler for the split text toolbar button
+         * which adds a user defined split at the current
+         * cursor position in the tweet text.
+         */
+
         insertTextAtCursor("\n(---)\n");
     };
     const clearTweet = () => {
+        /**
+         * Event handler for the clear tweet toolbar button.
+         */
+
         setTweetText("");
     };
     const toggleEditing = () => {
@@ -159,6 +182,10 @@ export default function App(props) {
         setEditing(!editing);
     };
     const loginHandler = () => {
+        /**
+         * Event handler for the Login button
+         */
+
         showDialog("Please wait while we try to log you into your account");
 
         login()
@@ -177,8 +204,7 @@ export default function App(props) {
     };
     const logoutHandler = () => {
         /**
-         * Calls the logout API endpoint and resets the loggedIn
-         * and user states to their initial values.
+         * Event handler for the Logout button
          */
 
         logout()
@@ -235,6 +261,7 @@ export default function App(props) {
          * Thread button without logging in, which would
          * start the login sequence.
          */
+
         if (getStorageItem("session", "publishAfterLogin")) {
             setStorageItem("session", "publishAfterLogin", false);
 
@@ -278,6 +305,11 @@ export default function App(props) {
         }
     };
     const displayAlert = (level, message) => {
+        /**
+         * Displays an alert in the UI using the severity level and
+         * the message specified.
+         */
+
         setAlertVisibility(true);
 
         setAlertSeverity(level);
@@ -325,8 +357,8 @@ export default function App(props) {
 
     // On every update, make sure that the TweetInput area has its
     // cursor in the correct place. This is to ensure that, when the
-    // user adds an emoji in the middle of any text that already
-    // exists, the cursor doesn't jump to the end
+    // user adds an emoji or a user defined split in the middle of any
+    // text that already exists, the cursor doesn't jump to the end
     useEffect(() => {
         if (tweetInputRef.current) {
             tweetInputRef.current.selectionStart = cursorPosition.start;
@@ -371,6 +403,8 @@ export default function App(props) {
         setStorageItem("session", "thread", thread);
     }, [thread]);
 
+    // When an alert is shown in the UI, start a timeout to hide
+    // it after a few seconds
     useEffect(() => {
         if (alertVisibility) {
             let closeAlertTimeout;
@@ -467,6 +501,7 @@ export default function App(props) {
                                         thread={thread}
                                         editThreadHandler={toggleEditing}
                                         publishHandler={publishThreadHandler}
+                                        setAlertData={displayAlert}
                                     />
                                 </Grid>
                             </Hidden>

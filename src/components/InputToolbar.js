@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
-import IconButton from "@material-ui/core/IconButton";
+import CustomIconButton from "./CustomIconButton";
 import EmojiEmotionsIcon from "@material-ui/icons/EmojiEmotions";
 import BackspaceIcon from "@material-ui/icons/Backspace";
 import ViewAgendaIcon from "@material-ui/icons/ViewAgenda";
@@ -15,13 +15,6 @@ const useStyles = makeStyles((theme) => ({
     root: {
         padding: 0,
         marginTop: "0.5em",
-    },
-    toolbarButton: {
-        marginRight: "0.45em",
-        color: theme.palette.secondary.dark,
-        "&:hover": {
-            color: theme.palette.secondary.main,
-        },
     },
 }));
 
@@ -59,33 +52,30 @@ export default function InputToolbar(props) {
                                 onSelect={props.pickEmojiHandler}
                             />
                         )}
-                        <IconButton
-                            className={classes.toolbarButton}
+                        <CustomIconButton
                             size="small"
                             onClick={handlePickerClick}
                             title="Emoji"
                         >
                             <EmojiEmotionsIcon />
-                        </IconButton>
+                        </CustomIconButton>
                     </span>
                 </ClickAwayListener>
             </Hidden>
-            <IconButton
-                className={classes.toolbarButton}
+            <CustomIconButton
                 size="small"
                 onClick={props.splitTweetHandler}
                 title="Split"
             >
                 <ViewAgendaIcon />
-            </IconButton>
-            <IconButton
-                className={classes.toolbarButton}
+            </CustomIconButton>
+            <CustomIconButton
                 size="small"
                 onClick={props.clearTweetHandler}
                 title="Clear"
             >
                 <BackspaceIcon />
-            </IconButton>
+            </CustomIconButton>
         </div>
     );
 }

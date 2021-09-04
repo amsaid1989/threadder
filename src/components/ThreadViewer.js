@@ -59,6 +59,7 @@ export default function ThreadViewer(props) {
             user={props.user}
             text={tweet}
             threadLine={index + 1 < arr.length}
+            setAlertData={props.setAlertData}
         />
     ));
 
