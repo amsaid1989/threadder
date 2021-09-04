@@ -3,8 +3,9 @@ import { makeStyles } from "@material-ui/core/styles";
 import classNames from "classnames";
 import Grid from "@material-ui/core/Grid";
 import Avatar from "@material-ui/core/Avatar";
-import TweetToolbar from "./TweetToolbar";
 import Hidden from "@material-ui/core/Hidden";
+import TweetToolbar from "./TweetToolbar";
+import TweetImage from "./TweetImage";
 import { getColumn, getRow } from "../controllers/gridPlacement";
 
 /**
@@ -100,17 +101,14 @@ const useStyles = makeStyles((theme) => ({
     imageGallery: {
         width: "100%",
         height: "16em",
+        minHeight: "16em",
+        maxHeight: "16em",
         marginTop: "0.4em",
         borderRadius: "0.5em",
         display: "grid",
         gridTemplateColumns: "1fr 1fr",
         gridTemplateRows: "1fr 1fr",
         gridGap: "0.25em",
-    },
-    image: {
-        width: "100%",
-        height: "100%",
-        objectFit: "cover",
     },
     hiddenOverflow: {
         overflow: "hidden",
@@ -191,18 +189,15 @@ export default function Tweet(props) {
         const [rowStart, rowEnd] = getRow(index, arr.length);
 
         return (
-            <img
+            <TweetImage
                 key={image}
-                src={image}
-                alt=""
-                className={classes.image}
+                imageSource={image}
+                altText=""
                 // Specify the column and row placement of each image
                 // in the grid, so that images fill the entire grid
                 // even if not all of the maximum of 4 images are added
-                style={{
-                    gridColumn: `${colStart} / ${colEnd}`,
-                    gridRow: `${rowStart} / ${rowEnd}`,
-                }}
+                gridColumn={`${colStart} / ${colEnd}`}
+                gridRow={`${rowStart} / ${rowEnd}`}
             />
         );
     });

@@ -14,6 +14,10 @@ export function getColumn(itemIndex, totalItems) {
     /**
      * Calculates the start and end grid columns for an item
      * based on its index and the number of items in the grid.
+     *
+     * The values are mostly hard coded since a tweet can only
+     * have a maximum of 4 images so there isn't a lot of
+     * variation in how they could be placed.
      */
 
     let colStart, colEnd;
@@ -40,6 +44,10 @@ export function getRow(itemIndex, totalItems) {
     /**
      * Calculates the start and end grid rows for an item
      * based on its index and the number of items in the grid.
+     *
+     * The values are mostly hard coded since a tweet can only
+     * have a maximum of 4 images so there isn't a lot of
+     * variation in how they could be placed.
      */
 
     let rowStart, rowEnd;
