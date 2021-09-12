@@ -7,7 +7,14 @@ import Hidden from "@material-ui/core/Hidden";
 import TweetToolbar from "./TweetToolbar";
 import TweetImage from "./TweetImage";
 import { getColumn, getRow } from "../controllers/gridPlacement";
-import { setStorageItem, getStorageItem } from "../controllers/storageWrappers";
+import {
+    dbConnected,
+    indexExistsInDB,
+    saveImagesToDB,
+    modifyImagesInDB,
+    deleteImagesFromDB,
+    reloadImagesFromDB,
+} from "../controllers/db";
 
 /**
  * The style and implementation of the Tweet component which is used
@@ -48,7 +55,7 @@ const useStyles = makeStyles((theme) => ({
         padding: 0,
     },
     threadLine: {
-        /*
+        /**
          * A class that controls the appearance of the line that
          * visually connects each tweet to the following one in
          * the thread.
@@ -68,7 +75,7 @@ const useStyles = makeStyles((theme) => ({
         marginLeft: "1em",
     },
     resetFont: {
-        /*
+        /**
          * A helper class to make sure that an element uses the parent's
          * font family and font size
          */
@@ -119,18 +126,32 @@ const useStyles = makeStyles((theme) => ({
 export default function Tweet(props) {
     const classes = useStyles();
 
-    const [images, setImages] = useState(
-        getStorageItem("session", "tweetImages")?.[props.tweetIndex] || []
-    );
+    // Destruct the props objects to get some of the
+    // items that will be used as dependencies for
+    // some of the hooks.
+    const { tweetIndex, setAlertData } = props;
+
+    const [images, setImages] = useState([]);
+    const [reloadImages, setReloadImages] = useState(true);
     const [disableAddImages, setDisableAddImages] = useState(false);
 
     const addImages = (imagesToAdd) => {
+        /**
+         * Updates the component state to add new
+         * images to the tweet.
+         */
+
         const updatedImages = [...images, ...imagesToAdd];
 
         setImages(updatedImages);
     };
 
     const removeImage = (index) => {
+        /**
+         * Updates the component state to delete
+         * an image from the tweet.
+         */
+
         const updatedImages = [
             ...images.slice(0, index),
             ...images.slice(index + 1),
@@ -164,20 +185,44 @@ export default function Tweet(props) {
     });
 
     useEffect(() => {
-        const records = images.map(async (image) => {
-            const buf = await image.arrayBuffer();
+        // When the app reloads, check the database for any
+        // images that were added to the tweets before
+        // reloading, and add them again.
+        // It runs in an interval until the connection to
+        // the database is successful and then it reloads
+        // the images from the database.
 
-            if (buf instanceof ArrayBuffer) {
-                return {
-                    name: image.name,
-                    type: image.type,
-                    buffer: buf,
-                };
+        let checkInterval;
+        let checkTimeout;
+
+        const reload = () => {
+            if (dbConnected()) {
+                clearInterval(checkInterval);
+
+                reloadImagesFromDB(tweetIndex).then((results) => {
+                    setImages(results);
+                });
+
+                setReloadImages(false);
             }
-        });
+        };
 
-        Promise.all(records).then((record) => console.log(record));
-    }, [images]);
+        if (reloadImages) {
+            checkInterval = setInterval(reload, 20);
+
+            // Setup a 10 second timeout. If the database
+            // is still not connected after that, then
+            // there is probably some problem with it and
+            // it won't connect. This way, we won't keep
+            // checking for it and wasting resources
+            // unnecessarily.
+            if (!checkTimeout) {
+                checkTimeout = setTimeout(() => {
+                    clearInterval(checkInterval);
+                }, 10000);
+            }
+        }
+    }, [reloadImages, tweetIndex]);
 
     useEffect(() => {
         // Disable the add images button once the limits defined by
@@ -190,14 +235,34 @@ export default function Tweet(props) {
     }, [images]);
 
     useEffect(() => {
-        // Store the images in the session storage so they can be
-        // restored when the component re-renders
-        const storeImages = getStorageItem("session", "tweetImages") || {};
+        // Calls an asynchronous function each time the images
+        // state is updated to save the state in the database.
+        (async () => {
+            if (dbConnected()) {
+                // Checks if there is an entry for the tweet
+                // already in the database.
+                const checkIndex = await indexExistsInDB(tweetIndex);
 
-        storeImages[props.tweetIndex] = images;
-
-        setStorageItem("session", "tweetImages", storeImages);
-    }, [props.tweetIndex, images]);
+                if (checkIndex) {
+                    if (images.length > 0) {
+                        modifyImagesInDB(tweetIndex, images).catch((err) => {
+                            setAlertData("error", err);
+                        });
+                    } else {
+                        deleteImagesFromDB(tweetIndex).catch((err) => {
+                            setAlertData("error", err);
+                        });
+                    }
+                } else {
+                    if (images.length > 0) {
+                        saveImagesToDB(tweetIndex, images).catch((err) => {
+                            setAlertData("error", err);
+                        });
+                    }
+                }
+            }
+        })();
+    }, [tweetIndex, setAlertData, images]);
 
     return (
         <Grid container className={classes.root}>

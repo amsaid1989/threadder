@@ -17,13 +17,11 @@ import { checkUserObject } from "./utils/objectIntegrityCheckers";
 import { login, logout, publishThread } from "./controllers/APICalls";
 import { setStorageItem, getStorageItem } from "./controllers/storageWrappers";
 import { insertIntoText } from "./controllers/textManip";
-import { openDB } from "./controllers/db";
+import { openDB, dbConnected, clearImagesFromDB } from "./controllers/db";
 import {
     UNTITLED_NAME,
     UNTITLED_SCREEN_NAME,
     UNTITLED_PROFILE_IMAGE,
-    THREADDER_DB_NAME,
-    THREADDER_DB_VERSION,
 } from "./utils/generalConstants";
 
 const useStyles = makeStyles((theme) => ({
@@ -71,8 +69,14 @@ export default function App(props) {
     };
 
     /* APP STATE */
+    // Technically, this state is not required and it is
+    // not used by anything else. The only reason it exists
+    // is because it is used as a dependency for a useEffect
+    // hook that opens the database when the app first
+    // starts. Without having a dependency for the hook, it
+    // will keep running for every render, which means it
+    // will go nonstop trying to open the database.
     const [dbOpen, setDBOpen] = useState(false);
-    const [db, setDB] = useState(undefined);
 
     const [alertVisibility, setAlertVisibility] = useState(false);
     const [alertSeverity, setAlertSeverity] = useState("error");
@@ -187,6 +191,20 @@ export default function App(props) {
 
         setEditing(!editing);
     };
+    const displayAlert = useCallback((level, message) => {
+        /**
+         * Displays an alert in the UI using the severity level and
+         * the message specified.
+         *
+         * Defined as a useCallback hook, to allow using it as
+         * a dependency for useEffect hooks.
+         */
+        setAlertVisibility(true);
+
+        setAlertSeverity(level);
+
+        setAlertMessage(message);
+    }, []);
     const loginHandler = () => {
         /**
          * Event handler for the Login button
@@ -256,7 +274,7 @@ export default function App(props) {
                 displayAlert("error", errorMessage);
             })
             .finally(closeDialog);
-    }, [thread]);
+    }, [thread, displayAlert]);
     const postLogin = useCallback(() => {
         /**
          * Checks if the thread needs to be published once
@@ -310,55 +328,23 @@ export default function App(props) {
             loginHandler();
         }
     };
-    const displayAlert = (level, message) => {
-        /**
-         * Displays an alert in the UI using the severity level and
-         * the message specified.
-         */
-
-        setAlertVisibility(true);
-
-        setAlertSeverity(level);
-
-        setAlertMessage(message);
-    };
     /* END EVENT HANDLERS AND FUNCTIONS */
 
     /* SIDE EFFECTS */
+    // Runs when the app loads and tries to open the database.
+    // TODO: Check to make sure that this hook doesn't keep running
+    // if the connection to database fails.
     useEffect(() => {
         if (!dbOpen) {
-            openDB(THREADDER_DB_NAME, THREADDER_DB_VERSION, {
-                stores: [
-                    {
-                        name: "images",
-                        config: { keyPath: "tweetIndex" },
-                        indices: [
-                            {
-                                name: "tweetIndex",
-                                keyPath: "tweetIndex",
-                                params: { unique: true },
-                            },
-                        ],
-                    },
-                ],
-            })
-                .then((db) => {
+            openDB()
+                .then(() => {
                     setDBOpen(true);
-                    setDB(db);
                 })
                 .catch((err) => {
                     displayAlert("error", err);
                 });
         }
-    }, [dbOpen]);
-
-    useEffect(() => {
-        return () => {
-            if (db && db instanceof IDBDatabase) {
-                db.close();
-            }
-        };
-    }, [db]);
+    }, [dbOpen, displayAlert]);
 
     // Once a login attempt is complete and the app reloads, check
     // the session store to display the appropriate alert depending
@@ -373,7 +359,7 @@ export default function App(props) {
 
             displayAlert("error", "Login failed");
         }
-    }, []);
+    }, [displayAlert]);
 
     // When the backend redirects to the app, set the user to logged
     // in if the process was successful. It also sets some values in
@@ -425,17 +411,50 @@ export default function App(props) {
         setStorageItem("session", "user", user);
     }, [user]);
 
+    // When the tweet text is cleared, clear the stored images
+    // from the IndexedDB if the tweet length is 0.
+    // This runs in an interval until the connection to the
+    // database is successful, and then it clears the images.
+    // The reason we need to clear the images is that, all of
+    // the application state is persisted in the sessionStorage
+    // which is cleared automatically when the tab is closed.
+    // However, the images are persisted in the IndexedDB, which
+    // isn't cleared manually.
+    useEffect(() => {
+        let checkInterval;
+        let checkTimeout;
+
+        const clear = () => {
+            if (dbConnected()) {
+                clearInterval(checkInterval);
+
+                if (tweetText.length === 0) {
+                    clearImagesFromDB();
+                }
+            }
+        };
+
+        checkInterval = setInterval(clear, 20);
+
+        // Setup a 10 second timeout. If the database
+        // is still not connected after that, then
+        // there is probably some problem with it and
+        // it won't connect. This way, we won't keep
+        // checking for it and wasting resources
+        // unnecessarily.
+        if (!checkTimeout) {
+            checkTimeout = setTimeout(() => {
+                clearInterval(checkInterval);
+            }, 10000);
+        }
+    }, [tweetText]);
+
     // When the tweetText is updated, update the thread state,
     // store the tweetText in the sessionStorage to ensure
-    // it persists across reloads and clear the stored images
-    // from the session storage if the tweet length is 0
+    // it persists across reloads and
     useEffect(() => {
         if (tweetText.length === 0) {
             setThread([]);
-
-            // Clear the images stored in the session storage
-            // when the text is cleared
-            setStorageItem("session", "tweetImages", {});
         } else {
             setThread(splitTweet(tweetText));
         }

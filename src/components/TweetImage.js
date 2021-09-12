@@ -43,6 +43,11 @@ export default function TweetImage(props) {
     const classes = useStyles();
 
     const revokeImgURL = () => {
+        /**
+         * Once the image is loaded, revokes the URL object
+         * that was used in its 'src' attribute.
+         */
+
         URL.revokeObjectURL(props.imageSource);
     };
 

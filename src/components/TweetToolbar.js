@@ -26,7 +26,7 @@ const useStyles = makeStyles((theme) => ({
         left: "-0.1875rem", // Calculated by dividing 3px by 16px which is equivalent to 1rem
     },
     resetFont: {
-        /*
+        /**
          * A helper class to make sure that an element uses the parent's
          * font family and font size
          */
@@ -61,6 +61,12 @@ export default function TweetToolbar(props) {
     };
 
     const filesSelectedHandler = (event) => {
+        /**
+         * Event handler for the file input. It runs everytime
+         * the user selects files from the dialog that opens
+         * when the add image button is clicked.
+         */
+
         const files = event.target.files;
 
         if (files.length === 0) {
@@ -100,28 +106,16 @@ export default function TweetToolbar(props) {
             return;
         }
 
+        // If all the files pass the checks, send them back
+        // to the parent Tweet component to be saved in its
+        // state
         props.addImagesHandler(filesArr);
-    };
 
-    const readFile = (file) => {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-
-            reader.readAsDataURL(file);
-
-            reader.addEventListener("load", (event) => {
-                resolve({
-                    url: event.target.result,
-                    name: file.name,
-                    size: file.size,
-                    type: file.type,
-                });
-            });
-
-            reader.addEventListener("error", () => {
-                reject(`Error reading file: ${file.name}`);
-            });
-        });
+        // We need to clear the value, because if a Chrome user
+        // attempts to upload the same image twice, the 'change'
+        // event will not fire, because the value of the input
+        // element won't actually change
+        event.target.value = "";
     };
 
     const exceedsAllowedLimits = (files) => {
@@ -160,6 +154,12 @@ export default function TweetToolbar(props) {
     };
 
     const fileSizeAllowed = (file) => {
+        /**
+         * Checks the size of the files selected by the user to
+         * make sure they meet the limits defined by the Twitter
+         * API.
+         */
+
         return (
             file.size < MAX_IMAGE_SIZE ||
             (file.type === "image/gif" && file.size < MAX_GIF_SIZE)
