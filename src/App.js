@@ -17,10 +17,13 @@ import { checkUserObject } from "./utils/objectIntegrityCheckers";
 import { login, logout, publishThread } from "./controllers/APICalls";
 import { setStorageItem, getStorageItem } from "./controllers/storageWrappers";
 import { insertIntoText } from "./controllers/textManip";
+import { openDB } from "./controllers/db";
 import {
     UNTITLED_NAME,
     UNTITLED_SCREEN_NAME,
     UNTITLED_PROFILE_IMAGE,
+    THREADDER_DB_NAME,
+    THREADDER_DB_VERSION,
 } from "./utils/generalConstants";
 
 const useStyles = makeStyles((theme) => ({
@@ -68,6 +71,9 @@ export default function App(props) {
     };
 
     /* APP STATE */
+    const [dbOpen, setDBOpen] = useState(false);
+    const [db, setDB] = useState(undefined);
+
     const [alertVisibility, setAlertVisibility] = useState(false);
     const [alertSeverity, setAlertSeverity] = useState("error");
     const [alertMessage, setAlertMessage] = useState("");
@@ -319,6 +325,41 @@ export default function App(props) {
     /* END EVENT HANDLERS AND FUNCTIONS */
 
     /* SIDE EFFECTS */
+    useEffect(() => {
+        if (!dbOpen) {
+            openDB(THREADDER_DB_NAME, THREADDER_DB_VERSION, {
+                stores: [
+                    {
+                        name: "images",
+                        config: { keyPath: "tweetIndex" },
+                        indices: [
+                            {
+                                name: "tweetIndex",
+                                keyPath: "tweetIndex",
+                                params: { unique: true },
+                            },
+                        ],
+                    },
+                ],
+            })
+                .then((db) => {
+                    setDBOpen(true);
+                    setDB(db);
+                })
+                .catch((err) => {
+                    displayAlert("error", err);
+                });
+        }
+    }, [dbOpen]);
+
+    useEffect(() => {
+        return () => {
+            if (db && db instanceof IDBDatabase) {
+                db.close();
+            }
+        };
+    }, [db]);
+
     // Once a login attempt is complete and the app reloads, check
     // the session store to display the appropriate alert depending
     // on whether the attempt was successful or not
@@ -384,12 +425,17 @@ export default function App(props) {
         setStorageItem("session", "user", user);
     }, [user]);
 
-    // When the tweetText is updated, update the thread state
-    // and store the tweetText in the sessionStorage to ensure
-    // it persists across reloads
+    // When the tweetText is updated, update the thread state,
+    // store the tweetText in the sessionStorage to ensure
+    // it persists across reloads and clear the stored images
+    // from the session storage if the tweet length is 0
     useEffect(() => {
         if (tweetText.length === 0) {
             setThread([]);
+
+            // Clear the images stored in the session storage
+            // when the text is cleared
+            setStorageItem("session", "tweetImages", {});
         } else {
             setThread(splitTweet(tweetText));
         }
@@ -415,7 +461,7 @@ export default function App(props) {
 
             closeAlertTimeout = setTimeout(() => {
                 setAlertVisibility(false);
-            }, 3000);
+            }, 4000);
 
             return () => clearTimeout(closeAlertTimeout);
         }

@@ -42,12 +42,20 @@ const useStyles = makeStyles((theme) => ({
 export default function TweetImage(props) {
     const classes = useStyles();
 
+    const revokeImgURL = () => {
+        URL.revokeObjectURL(props.imageSource);
+    };
+
     return (
         <div
             className={classes.root}
             style={{ gridColumn: props.gridColumn, gridRow: props.gridRow }}
         >
-            <CustomIconButton size="small" className={classes.deleteButton}>
+            <CustomIconButton
+                size="small"
+                className={classes.deleteButton}
+                onClick={() => props.deleteImageHandler(props.imageIndex)}
+            >
                 <span className={classes.iconBackground} />
                 <CancelIcon className={classes.buttonIcon} />
             </CustomIconButton>
@@ -56,6 +64,7 @@ export default function TweetImage(props) {
                 src={props.imageSource}
                 alt={props.altText}
                 className={classes.image}
+                onLoad={revokeImgURL}
             />
         </div>
     );

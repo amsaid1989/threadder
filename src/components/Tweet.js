@@ -7,6 +7,7 @@ import Hidden from "@material-ui/core/Hidden";
 import TweetToolbar from "./TweetToolbar";
 import TweetImage from "./TweetImage";
 import { getColumn, getRow } from "../controllers/gridPlacement";
+import { setStorageItem, getStorageItem } from "../controllers/storageWrappers";
 
 /**
  * The style and implementation of the Tweet component which is used
@@ -118,99 +119,85 @@ const useStyles = makeStyles((theme) => ({
 export default function Tweet(props) {
     const classes = useStyles();
 
-    const supportedImageTypes = [".png", ".jpg", ".jpeg", ".gif", ".webp"];
-
-    const [images, setImages] = useState([]);
+    const [images, setImages] = useState(
+        getStorageItem("session", "tweetImages")?.[props.tweetIndex] || []
+    );
     const [disableAddImages, setDisableAddImages] = useState(false);
 
     const addImages = (imagesToAdd) => {
         const updatedImages = [...images, ...imagesToAdd];
 
-        if (exceedsAllowedLimits(updatedImages)) {
-            props.setAlertData(
-                "error",
-                "A maximum of 1 GIF or 4 images can be added"
-            );
-
-            return;
-        }
-
-        if (!allFilesAreSupported(updatedImages)) {
-            props.setAlertData(
-                "error",
-                `Only the following file types are supported: ${supportedImageTypes.join(
-                    ", "
-                )}`
-            );
-
-            return;
-        }
-
         setImages(updatedImages);
     };
 
-    const allFilesAreSupported = (files) => {
-        /**
-         * Tests all files in an array to make sure that they all
-         * are supported image types.
-         */
+    const removeImage = (index) => {
+        const updatedImages = [
+            ...images.slice(0, index),
+            ...images.slice(index + 1),
+        ];
 
-        // Clean the file extensions from the dot at the beginning
-        // and prefix the extension with the string 'image/' because
-        // that is how the image type appears in the file URL as
-        // formatted by the FileReader
-        const extensions = supportedImageTypes.map(
-            (type) => `image/${type.slice(1)}`
-        );
-
-        return files.every((file) => {
-            return extensions.some((ext) => file.includes(ext));
-        });
-    };
-
-    const exceedsAllowedLimits = (files) => {
-        /**
-         * Tests all the files in the array to test if it exceeds
-         * the maximum number of images allowed by Twitter (currently,
-         * 1 GIF or 4 images).
-         *
-         * Returns true if the limits are exceeded, false otherwise.
-         */
-
-        return (
-            files.length > 4 ||
-            (files.some((file) => file.includes("image/gif")) &&
-                files.length > 1)
-        );
+        setImages(updatedImages);
     };
 
     const imageElements = images.map((image, index, arr) => {
         const [colStart, colEnd] = getColumn(index, arr.length);
         const [rowStart, rowEnd] = getRow(index, arr.length);
 
+        const key = image + index + colStart + colEnd + rowStart + rowEnd;
+
+        const src = URL.createObjectURL(image);
+
         return (
             <TweetImage
-                key={image}
-                imageSource={image}
+                key={key}
+                imageSource={src}
                 altText=""
                 // Specify the column and row placement of each image
                 // in the grid, so that images fill the entire grid
                 // even if not all of the maximum of 4 images are added
                 gridColumn={`${colStart} / ${colEnd}`}
                 gridRow={`${rowStart} / ${rowEnd}`}
+                imageIndex={index}
+                deleteImageHandler={removeImage}
             />
         );
     });
 
     useEffect(() => {
-        // Disables the add images button once the limits defined by
+        const records = images.map(async (image) => {
+            const buf = await image.arrayBuffer();
+
+            if (buf instanceof ArrayBuffer) {
+                return {
+                    name: image.name,
+                    type: image.type,
+                    buffer: buf,
+                };
+            }
+        });
+
+        Promise.all(records).then((record) => console.log(record));
+    }, [images]);
+
+    useEffect(() => {
+        // Disable the add images button once the limits defined by
         // Twitter are reached
         const shouldDisable =
             images.length === 4 ||
-            (images.length === 1 && images[0].includes("image/gif"));
+            (images.length === 1 && images[0].type === "image/gif");
 
         setDisableAddImages(shouldDisable);
     }, [images]);
+
+    useEffect(() => {
+        // Store the images in the session storage so they can be
+        // restored when the component re-renders
+        const storeImages = getStorageItem("session", "tweetImages") || {};
+
+        storeImages[props.tweetIndex] = images;
+
+        setStorageItem("session", "tweetImages", storeImages);
+    }, [props.tweetIndex, images]);
 
     return (
         <Grid container className={classes.root}>
@@ -311,7 +298,6 @@ export default function Tweet(props) {
 
                 <Grid item>
                     <TweetToolbar
-                        imageTypes={supportedImageTypes}
                         length={props.text.length}
                         addDisabled={disableAddImages}
                         setAlertData={props.setAlertData}
