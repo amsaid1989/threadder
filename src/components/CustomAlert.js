@@ -5,10 +5,10 @@ import Alert from "@material-ui/lab/Alert";
 const useStyles = makeStyles((theme) => ({
     root: {
         position: "absolute",
-        width: "30%",
+        width: "50%",
         margin: 0,
         zIndex: 10000,
-        left: "45%",
+        left: "25%",
         top: 0,
     },
 }));

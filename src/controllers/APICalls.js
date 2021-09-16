@@ -32,6 +32,32 @@ export function logout() {
     return sendAPIRequest("/logout", "get");
 }
 
+export function publishAllTweetImages(files) {
+    return new Promise((resolve, reject) => {
+        const promises = files.map((file) => publishMedia(file));
+
+        Promise.all(promises)
+            .then((results) => {
+                const output = results.map(
+                    (response) => response.data.media_id
+                );
+
+                resolve(output);
+            })
+            .catch((err) => {
+                reject(err);
+            });
+    });
+}
+
+function publishMedia(file) {
+    const data = new FormData();
+
+    data.append("mediaFile", file);
+
+    return sendAPIRequest("/upload_media", "post", data);
+}
+
 export function publishThread(thread) {
     /**
      * Call the publish_thread route

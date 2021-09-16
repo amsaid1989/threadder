@@ -126,21 +126,21 @@ function addOrUpdateImages(tweetIndex, imgArr, storeOperation) {
                     const request = store[storeOperation](tweetImages);
 
                     // EVENT HANDLERS
-                    request.addEventListener("success", () => {
-                        resolve("All done!");
-                    });
-
-                    request.addEventListener("error", () => {
+                    const errorHandler = () => {
                         reject("Failed to save images to database");
-                    });
+                    };
 
                     transaction.addEventListener("abort", () => {
                         reject("Adding images to the database was aborted");
                     });
 
-                    transaction.addEventListener("error", () => {
-                        reject("Failed to save images to database");
+                    transaction.addEventListener("error", errorHandler);
+
+                    request.addEventListener("success", () => {
+                        resolve("All done!");
                     });
+
+                    request.addEventListener("error", errorHandler);
                 })
                 .catch(() => {
                     reject(
@@ -188,21 +188,21 @@ function getOrDeleteImagesFromDB(tweetIndex, storeOperation) {
 
             const request = store[storeOperation](tweetIndex);
 
-            request.addEventListener("success", (event) => {
-                resolve(event.target.result);
-            });
-
-            request.addEventListener("error", () => {
+            const errorHandler = () => {
                 reject("Failed to save images to database");
-            });
+            };
 
             transaction.addEventListener("abort", () => {
                 reject("Adding images to the database was aborted");
             });
 
-            transaction.addEventListener("error", () => {
-                reject("Failed to save images to database");
+            transaction.addEventListener("error", errorHandler);
+
+            request.addEventListener("success", (event) => {
+                resolve(event.target.result);
             });
+
+            request.addEventListener("error", errorHandler);
         } else {
             reject("Can't save any images because the database isn't open");
         }
@@ -269,6 +269,48 @@ export function indexExistsInDB(tweetIndex) {
             .catch(() => {
                 resolve(false);
             });
+    });
+}
+
+export function getAllImagesFromDB() {
+    return new Promise((resolve, reject) => {
+        if (db && db instanceof IDBDatabase) {
+            const transaction = db.transaction(["images"], "readonly");
+
+            const store = transaction.objectStore("images");
+
+            const request = store.getAll();
+
+            const errorHandler = () => {
+                reject("Failed to retrieve images from the database");
+            };
+
+            transaction.addEventListener("error", errorHandler);
+
+            transaction.addEventListener("abort", () => {
+                reject("Retrieving the images from the database was aborted");
+            });
+
+            request.addEventListener("error", errorHandler);
+
+            request.addEventListener("success", (event) => {
+                let out = [];
+
+                for (let tweet of event.target.result) {
+                    const buffers = tweet.buffers;
+
+                    delete tweet.buffers;
+
+                    tweet.files = buffersToFileObjects(buffers);
+
+                    out.push(tweet);
+                }
+
+                resolve(out);
+            });
+        } else {
+            reject("Database is not connected");
+        }
     });
 }
 

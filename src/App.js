@@ -14,10 +14,20 @@ import MessagesDialog from "./components/MessagesDialog";
 import CustomAlert from "./components/CustomAlert";
 import splitTweet from "./controllers/tweetSplitter";
 import { checkUserObject } from "./utils/objectIntegrityCheckers";
-import { login, logout, publishThread } from "./controllers/APICalls";
+import {
+    login,
+    logout,
+    publishAllTweetImages,
+    publishThread,
+} from "./controllers/APICalls";
 import { setStorageItem, getStorageItem } from "./controllers/storageWrappers";
 import { insertIntoText } from "./controllers/textManip";
-import { openDB, dbConnected, clearImagesFromDB } from "./controllers/db";
+import {
+    openDB,
+    dbConnected,
+    clearImagesFromDB,
+    getAllImagesFromDB,
+} from "./controllers/db";
 import {
     UNTITLED_NAME,
     UNTITLED_SCREEN_NAME,
@@ -247,7 +257,7 @@ export default function App(props) {
                 displayAlert("error", errorMessage);
             });
     };
-    const publishTweets = useCallback(() => {
+    const publishTweets = useCallback(async () => {
         /**
          * A helper function that handles calling the function
          * that sends the thread to the backend and clears the
@@ -257,7 +267,30 @@ export default function App(props) {
 
         showDialog("Hold tight while we publish your thread");
 
-        publishThread(thread)
+        const toPublish = thread.map((tweet) => ({ text: tweet, media: [] }));
+
+        const allImages = await getAllImagesFromDB();
+
+        if (allImages instanceof Array && allImages.length > 0) {
+            for (const tweetImages of allImages) {
+                const index = Number(tweetImages.tweetIndex);
+
+                const images = await publishAllTweetImages(tweetImages.files);
+
+                if (images instanceof Array) {
+                    toPublish[index].media = images;
+                } else {
+                    displayAlert(
+                        "error",
+                        "Thread publishing was cancelled because publishing the images failed"
+                    );
+
+                    return;
+                }
+            }
+        }
+
+        publishThread(toPublish)
             .then(() => {
                 displayAlert("success", "Thread published successfully");
 
@@ -275,23 +308,6 @@ export default function App(props) {
             })
             .finally(closeDialog);
     }, [thread, displayAlert]);
-    const postLogin = useCallback(() => {
-        /**
-         * Checks if the thread needs to be published once
-         * the login is successful. If it does, then it
-         * publishes it.
-         *
-         * This happens when the user clicks the Publish
-         * Thread button without logging in, which would
-         * start the login sequence.
-         */
-
-        if (getStorageItem("session", "publishAfterLogin")) {
-            setStorageItem("session", "publishAfterLogin", false);
-
-            publishTweets();
-        }
-    }, [publishTweets]);
     const showDialog = (message) => {
         /**
          * Opens the modal dialog with the specified message.
@@ -380,7 +396,19 @@ export default function App(props) {
                 setStorageItem("session", "loginFailMessage", true);
             }
         }
-    }, [postLogin]);
+    }, []);
+
+    useEffect(() => {
+        if (
+            document.location.search === "" &&
+            thread.length > 0 &&
+            getStorageItem("session", "publishAfterLogin")
+        ) {
+            setStorageItem("session", "publishAfterLogin", false);
+
+            publishTweets();
+        }
+    }, [thread, publishTweets]);
 
     // On every update, make sure that the TweetInput area has its
     // cursor in the correct place. This is to ensure that, when the
@@ -464,9 +492,9 @@ export default function App(props) {
 
     // When the thread is updated, store it in the sessionStorage
     // to ensure it persists across reloads
-    useEffect(() => {
-        setStorageItem("session", "thread", thread);
-    }, [thread]);
+    // useEffect(() => {
+    //     setStorageItem("session", "thread", thread);
+    // }, [thread]);
 
     // When an alert is shown in the UI, start a timeout to hide
     // it after a few seconds
