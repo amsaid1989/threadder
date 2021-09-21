@@ -146,20 +146,28 @@ function splitAtFullstops(text) {
      */
 
     const removeFullstopPattern =
-        /((?<!\svs?)(?<=\s\w+[a-zA-Z]+)\.(?=\s*[a-zA-Z]+\w*)|(?<=\d+[\s./-]\d+|\s\d+)\.(?=\s*\W*[a-zA-Z]+\w*\W*)|\.$)/g;
+        /\svs?\.|\s\w+[a-zA-Z]+(\.)(?=\s*[a-zA-Z]+\w*)|\d+[\s./-]\d+(\.)(?=\s*\W*[a-zA-Z]+\w*\W*)|\s\d+(\.)(?=\s*\W*[a-zA-Z]+\w*\W*)|(\.)$/g;
 
-    return text
-        .split(removeFullstopPattern)
-        .map((tweet, idx, arr) => {
-            if (arr[idx + 1] === ".") {
-                return `${tweet}.`;
-            } else if (tweet === ".") {
-                return "";
-            } else {
-                return tweet;
+    let splitIndices = [];
+
+    for (const match of text.matchAll(removeFullstopPattern)) {
+        if (match[1] || match[2] || match[3] || match[4]) {
+            splitIndices.push(match.index + match[0].length);
+        }
+    }
+
+    return splitIndices
+        .map((splitIndex, index, arr) => {
+            if (index === 0) {
+                return text.slice(0, splitIndex);
             }
+
+            if (index + 1 === arr.length && splitIndex + 1 < text.length) {
+                return text.slice(splitIndex);
+            }
+
+            return text.slice(arr[index - 1], splitIndex);
         })
-        .filter((tweet) => tweet !== "")
         .map((tweet) => trimTopAndTailSpaces(tweet));
 }
 
