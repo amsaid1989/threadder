@@ -1,25 +1,57 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
-  "icons": [
-    {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
-    },
-    {
-      "src": "logo192.png",
-      "type": "image/png",
-      "sizes": "192x192"
-    },
-    {
-      "src": "logo512.png",
-      "type": "image/png",
-      "sizes": "512x512"
-    }
-  ],
-  "start_url": ".",
-  "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+    "name": "Threadder",
+    "short_name": "Threadder",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#202c39",
+    "description": "Threadder lets you write and publish threads to your Twitter account with ease. No more adding one tweet after the other or replying to a previous tweet to prepare your thread. Just type whatever you have on your mind, and let Threadder handle splitting it into a thread and publish it to your account.",
+    "dir": "ltr",
+    "categories": "productivity,social,utilities",
+    "lang": "en",
+    "orientation": "any",
+    "scope": "/",
+    "theme_color": "#283845",
+    "icons": [
+        {
+            "src": "icons/icon_48x48.png",
+            "sizes": "48x48",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/icon_72x72.png",
+            "sizes": "72x72",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/icon_96x96.png",
+            "sizes": "96x96",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/icon_144x144.png",
+            "sizes": "144x144",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/icon_168x168.png",
+            "sizes": "168x168",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/icon_192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/icon_512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/maskable_icon.png",
+            "sizes": "320x320",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ]
 }
