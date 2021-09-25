@@ -2,7 +2,7 @@ import axios from "axios";
 import { SERVER } from "../utils/generalConstants";
 
 function sendAPIRequest(url, method, data = undefined) {
-    /*
+    /**
      * Utility function that makes a request to the backend
      * sending along any data that is passed as an argument.
      */

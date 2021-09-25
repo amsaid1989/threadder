@@ -1,7 +1,7 @@
 {
     "name": "threadder-frontend",
     "version": "0.1.0",
-    "homepage": "https://amsaid1989.github.io/threadder",
+    "homepage": ".",
     "private": true,
     "dependencies": {
         "@material-ui/core": "^4.11.4",
@@ -36,7 +36,7 @@
     },
     "scripts": {
         "start": "react-scripts start",
-        "build": "react-scripts build",
+        "build": "react-scripts build && cp -R build/* ../threadder-backend/src/public/",
         "test": "react-scripts test",
         "eject": "react-scripts eject",
         "push": "git add . && git commit -a && git push -u origin main"
