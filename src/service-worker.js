@@ -37,6 +37,19 @@ registerRoute(
             return false;
         } // If this looks like a URL for a resource, because it contains // a file extension, skip.
 
+        // Service worker shouldn't handle any of the backend routes
+        const backendRoutes = [
+            "request_token",
+            "callback",
+            "publish_thread",
+            "upload_media",
+            "logout",
+        ];
+
+        if (backendRoutes.some((route) => url.pathname.includes(route))) {
+            return false;
+        }
+
         if (url.pathname.match(fileExtensionRegexp)) {
             return false;
         } // Return true to signal that we want to use the handler.

@@ -1,7 +1,7 @@
 {
     "name": "Threadder",
     "short_name": "Threadder",
-    "start_url": "/",
+    "start_url": "/threadder/",
     "display": "standalone",
     "background_color": "#202c39",
     "description": "Threadder lets you write and publish threads to your Twitter account with ease. No more adding one tweet after the other or replying to a previous tweet to prepare your thread. Just type whatever you have on your mind, and let Threadder handle splitting it into a thread and publish it to your account.",
@@ -9,7 +9,7 @@
     "categories": "productivity,social,utilities",
     "lang": "en",
     "orientation": "any",
-    "scope": "/",
+    "scope": "/threadder/",
     "theme_color": "#283845",
     "icons": [
         {

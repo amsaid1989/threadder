@@ -275,11 +275,15 @@ export default function App(props) {
             for (const tweetImages of allImages) {
                 const index = Number(tweetImages.tweetIndex);
 
-                const images = await publishAllTweetImages(tweetImages.files);
+                try {
+                    const mediaIDs = await publishAllTweetImages(
+                        tweetImages.files
+                    );
 
-                if (images instanceof Array) {
-                    toPublish[index].media = images;
-                } else {
+                    toPublish[index].media = mediaIDs;
+                } catch {
+                    closeDialog();
+
                     displayAlert(
                         "error",
                         "Thread publishing was cancelled because publishing the images failed"
@@ -385,7 +389,7 @@ export default function App(props) {
         if (document.location.search !== "") {
             const user = queryString.parse(document.location.search);
 
-            document.location.search = "";
+            document.location.href = "/";
 
             if (checkUserObject(user)) {
                 setLoggedIn(true);
