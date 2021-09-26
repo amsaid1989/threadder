@@ -156,6 +156,10 @@ function splitAtFullstops(text) {
         }
     }
 
+    if (splitIndices.length === 0) {
+        return [text];
+    }
+
     return splitIndices
         .map((splitIndex, index, arr) => {
             if (index === 0) {
