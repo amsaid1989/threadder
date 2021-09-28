@@ -8,6 +8,7 @@ import Hidden from "@material-ui/core/Hidden";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import data from "emoji-mart/data/twitter.json";
 import { NimblePicker } from "emoji-mart";
+import { isMobile } from "../utils/detectMobileBrowsers";
 import "emoji-mart/css/emoji-mart.css";
 import "./emojiPicker.css";
 
@@ -38,7 +39,8 @@ export default function InputToolbar(props) {
 
     return (
         <div className={classes.root}>
-            <Hidden smDown>
+            {/* EMOJI BUTTON */}
+            <Hidden smDown={isMobile()}>
                 <ClickAwayListener onClickAway={handleClickAway}>
                     <span style={{ position: "relative" }}>
                         {pickerOpen && (
@@ -62,6 +64,7 @@ export default function InputToolbar(props) {
                     </span>
                 </ClickAwayListener>
             </Hidden>
+            {/* FORCE SPLIT BUTTON */}
             <CustomIconButton
                 size="small"
                 onClick={props.splitTweetHandler}
@@ -69,6 +72,7 @@ export default function InputToolbar(props) {
             >
                 <ViewAgendaIcon />
             </CustomIconButton>
+            {/* CLEAR INPUT BUTTON */}
             <CustomIconButton
                 size="small"
                 onClick={props.clearTweetHandler}
