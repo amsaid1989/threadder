@@ -5819,6 +5819,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"dompurify@npm:^2.3.3":
+  version: 2.3.3
+  resolution: "dompurify@npm:2.3.3"
+  checksum: 1ddaffeda54aac86dc0c55a49ae9c74dc388596851f6f74179dc5ecc74b0f00ceba579acae6c9e9b06ac71573e9f87cf5d2358f5da046f89c8a13936df8c03da
+  languageName: node
+  linkType: hard
+
 "domutils@npm:^1.5.1, domutils@npm:^1.7.0":
   version: 1.7.0
   resolution: "domutils@npm:1.7.0"
@@ -14565,6 +14572,7 @@ resolve@1.18.1:
     "@testing-library/user-event": ^12.1.10
     axios: ^0.21.1
     classnames: ^2.3.1
+    dompurify: ^2.3.3
     dotenv: ^10.0.0
     emoji-mart: ^3.0.1
     eslint-config-react-app: ^6.0.0

@@ -344,9 +344,8 @@ export default function Tweet(props) {
                             classes.defaultTextColor,
                             classes.tweetText
                         )}
-                    >
-                        {props.text}
-                    </p>
+                        dangerouslySetInnerHTML={{ __html: props.text }}
+                    />
                 </Grid>
 
                 <Hidden xsUp={images.length === 0}>

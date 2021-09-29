@@ -4,6 +4,11 @@ import Container from "@material-ui/core/Container";
 import Grid from "@material-ui/core/Grid";
 import StyledButton from "./StyledButton";
 import Hidden from "@material-ui/core/Hidden";
+import DOMPurify from "dompurify";
+import {
+    matchEntitiesInTweet,
+    highlightTweetEntities,
+} from "../controllers/tweetEntitiesHandler";
 import Tweet from "./Tweet";
 
 /**
@@ -53,38 +58,49 @@ const useStyles = makeStyles((theme) => ({
 export default function ThreadViewer(props) {
     const classes = useStyles();
 
-    const tweets = props.thread.map((tweet, index, arr) => (
-        <Tweet
-            // The index is used as a key here on purpose because
-            // it is the only unique identifier available for the
-            // tweet, apart from its text.
-            // Since the data comes directly from user inputting
-            // the text, there is no way to get an ID for each
-            // tweet.
-            // The text of the tweet could have been used as a key
-            // but that would create issues if the user adds images
-            // to the tweet, because if the user decides to change
-            // the text, then the key would change and the images
-            // would be removed.
-            // Using the index as a key solves this issue, because
-            // the images are added to the tweet based on its
-            // location in the array. However, this creates another
-            // issue. If the user adds images to the tweet, then
-            // decides to add another tweet before it, then all the
-            // images would shift to the previous tweet.
-            // However, the user adding an entire tweet before is
-            // definitely less likely to happen than the user updating
-            // the text of the tweet, it makes more sense to rely on
-            // the array index, until a better solution to identify
-            // each tweet is figured out.
-            key={index}
-            tweetIndex={index}
-            user={props.user}
-            text={tweet}
-            threadLine={index + 1 < arr.length}
-            setAlertData={props.setAlertData}
-        />
-    ));
+    const tweets = props.thread.map((tweet, index, arr) => {
+        const sanitizedTweet = DOMPurify.sanitize(tweet);
+
+        const matches = matchEntitiesInTweet(sanitizedTweet);
+
+        const highlightedTweet = highlightTweetEntities(
+            sanitizedTweet,
+            matches
+        );
+
+        return (
+            <Tweet
+                // The index is used as a key here on purpose because
+                // it is the only unique identifier available for the
+                // tweet, apart from its text.
+                // Since the data comes directly from user inputting
+                // the text, there is no way to get an ID for each
+                // tweet.
+                // The text of the tweet could have been used as a key
+                // but that would create issues if the user adds images
+                // to the tweet, because if the user decides to change
+                // the text, then the key would change and the images
+                // would be removed.
+                // Using the index as a key solves this issue, because
+                // the images are added to the tweet based on its
+                // location in the array. However, this creates another
+                // issue. If the user adds images to the tweet, then
+                // decides to add another tweet before it, then all the
+                // images would shift to the previous tweet.
+                // However, the user adding an entire tweet before is
+                // definitely less likely to happen than the user updating
+                // the text of the tweet, it makes more sense to rely on
+                // the array index, until a better solution to identify
+                // each tweet is figured out.
+                key={index}
+                tweetIndex={index}
+                user={props.user}
+                text={highlightedTweet}
+                threadLine={index + 1 < arr.length}
+                setAlertData={props.setAlertData}
+            />
+        );
+    });
 
     return (
         <Grid
