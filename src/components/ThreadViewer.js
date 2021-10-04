@@ -1,15 +1,15 @@
+import { useEffect, useRef } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import classNames from "classnames";
 import Container from "@material-ui/core/Container";
 import Grid from "@material-ui/core/Grid";
-import StyledButton from "./StyledButton";
 import Hidden from "@material-ui/core/Hidden";
 import DOMPurify from "dompurify";
-import {
-    matchEntitiesInTweet,
-    highlightTweetEntities,
-} from "../controllers/tweetEntitiesHandler";
+import StyledButton from "./StyledButton";
 import Tweet from "./Tweet";
+import HashtagAndMention from "./HashtagAndMention";
+import CustomURL from "./CustomURL";
+import { highlightTweetEntities } from "../controllers/tweetEntitiesHandler";
 
 /**
  * The styles and implementation of the Thread Viewer component.
@@ -61,11 +61,10 @@ export default function ThreadViewer(props) {
     const tweets = props.thread.map((tweet, index, arr) => {
         const sanitizedTweet = DOMPurify.sanitize(tweet);
 
-        const matches = matchEntitiesInTweet(sanitizedTweet);
-
         const highlightedTweet = highlightTweetEntities(
             sanitizedTweet,
-            matches
+            HashtagAndMention,
+            CustomURL
         );
 
         return (
@@ -95,11 +94,22 @@ export default function ThreadViewer(props) {
                 key={index}
                 tweetIndex={index}
                 user={props.user}
-                text={highlightedTweet}
                 threadLine={index + 1 < arr.length}
                 setAlertData={props.setAlertData}
-            />
+            >
+                {highlightedTweet}
+            </Tweet>
         );
+    });
+
+    const containerRef = useRef(null);
+
+    // When a new tweet is added that makes the thread viewer overflow,
+    // scroll the thread viewer to the bottom to display the last tweet
+    useEffect(() => {
+        if (containerRef) {
+            containerRef.current.scrollTop = containerRef.current.scrollTopMax;
+        }
     });
 
     return (
@@ -129,6 +139,7 @@ export default function ThreadViewer(props) {
                         classes.containerWithShadow,
                         classes.autoOverflow
                     )}
+                    ref={containerRef}
                 >
                     {tweets}
                 </Container>

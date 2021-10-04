@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, createRef } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import classNames from "classnames";
 import Grid from "@material-ui/core/Grid";
@@ -134,6 +134,9 @@ export default function Tweet(props) {
     const [images, setImages] = useState([]);
     const [reloadImages, setReloadImages] = useState(true);
     const [disableAddImages, setDisableAddImages] = useState(false);
+    const [tweetLength, setTweetLength] = useState(0);
+
+    const tweetTextRef = createRef(null);
 
     const addImages = (imagesToAdd) => {
         /**
@@ -183,6 +186,12 @@ export default function Tweet(props) {
             />
         );
     });
+
+    useEffect(() => {
+        // Get the tweet length from the DOM element reference
+        // and update the state
+        setTweetLength(tweetTextRef.current.innerText.length);
+    }, [tweetTextRef]);
 
     useEffect(() => {
         // When the app reloads, check the database for any
@@ -344,8 +353,10 @@ export default function Tweet(props) {
                             classes.defaultTextColor,
                             classes.tweetText
                         )}
-                        dangerouslySetInnerHTML={{ __html: props.text }}
-                    />
+                        ref={tweetTextRef}
+                    >
+                        {props.children}
+                    </p>
                 </Grid>
 
                 <Hidden xsUp={images.length === 0}>
@@ -362,7 +373,7 @@ export default function Tweet(props) {
 
                 <Grid item>
                     <TweetToolbar
-                        length={props.text.length}
+                        length={tweetLength}
                         addDisabled={disableAddImages}
                         setAlertData={props.setAlertData}
                         addImagesHandler={addImages}

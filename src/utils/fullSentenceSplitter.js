@@ -89,60 +89,57 @@ function splitAtFullstops(text) {
     /**
      * Let's break this regex pattern down to clarify what it does exactly.
      *
-     * The pattern is actually 2 patterns combined as alternatives.
+     * The pattern matches against several alternatives to check if they
+     * exist in the text. It uses capturing groups for some of these
+     * alternatives to ensure that the text is only split if one of the
+     * alternatives captured is encountered.
      *
-     * The first one is this:
-     * (?<!\svs?)(?<=\s\w+[a-zA-Z]+)\.(?=\s*[a-zA-Z]+\w*)
-     *
-     * (?<!\svs?)
-     * It starts with a negative lookbehind that ensures the full stop
-     * is not preceded by the abbreviations 'v' or 'vs' for versus. This
-     * is to avoid splitting the sentence at the abbreviation since it
-     * almost always comes mid-sentence.
-     *
-     * (?<=\s\w+[a-zA-Z]+)
-     * Then, we have a positive lookbehind that makes sure the full stop
-     * is preceded by a string of text that is made of at least 1 alphabetical
-     * character and 1 word character (a-zA-Z0-9_). This is to avoid splitting
-     * sentences when initials are encountered. For instance, Abdelrahman
-     * M. Said shouldn't be split after the M. It also ensure that the last
-     * character before the full stop is alphabetical. This is to avoid
-     * splitting at points that separate currencies which have no symbol,
-     * and uses alphabetical letters instead. For example, EGP4.5M, won't be
-     * split, because the last character before the full stop is a digit.
-     *
-     * \.
-     * Next, we have the pattern that matches the full stop character.
-     *
-     * (?=\s*[a-zA-Z]+\w*)
-     * And lastly, for the first pattern, we have a positive lookahead which
-     * ensures that the full stop is succeeded by at least 1 alphabetical
-     * character that comes immediately after it. It will also match any
-     * length of word or non-word characters that follow the alphabetical
-     * one.
-     *
+     * The first alternative is this:
+     * \svs?\.
+     * This matches a fullstop that comes after an abbreviation for the
+     * word versus, whether it is abbreviated as v. or vs.
+     * However, this fullstop isn't captured so it isn't used as a splitting
+     * point for the text.
      *
      * The second alternative is this:
-     * (?<=\d+[\s./-]\d+|\s\d+)\.(?=\s*\W*[a-zA-Z]+\w*\W*)
+     * \s\w+[a-zA-Z]+(\.)(?=\s*[a-zA-Z]+\w*)
+     * NOTE: The fullstop is captured in this alternative.
+     * This matches any fullstop that is preceeded and succeeded by strings
+     * that contain at least 1 alphabetic character.
+     * So, a string like this: "testing strings. this should split"
+     * will be split because the fullstop is preceeded and succeeded by
+     * strings that match this alternative.
+     * The same goes for: "123m. GBP123".
+     * However, a string similar to this won't be matched: "123. 321" since
+     * it doesn't fulfill the requirement of having at least 1 alphabetical
+     * character in the strings that preceed and succeed the fullstop.
      *
-     * (?<=\d+[\s./-]\d+|\s\d+)
-     * This one starts with a positive lookbehind that looks for either
-     * a string of digits that is at least 1 digit long and that is preceded
-     * by a space or a sequence of digits separated by some of the separator
-     * used with dates or IP addresses such as ., -, and /.
+     * NOTE: The third alternative is this:
+     * \d+[\s./-]\d+(\.)(?=\s*\W*[a-zA-Z]+\w*\W*)
+     * The fullstop is captured in this alternative.
+     * This matches a fullstop that comes after a string of digits split by
+     * a space, a slash or a dash, and is succeeded by a strings of characters
+     * that contains at least 1 alphabetical character. This is to ensure that
+     * a fullstop that comes after an IP address, for instance, can be used
+     * to split the text, but the fullstops that actually separate the parts
+     * of the IP address are ignored.
      *
-     * This is combined with a similar positive lookahead to the one in the
-     * previous pattern. This ensures that a sequence of digits at the end
-     * of a sentence will be captured correctly (lorem ipsum 2019.)
+     * The fourth alternative is this:
+     * \s\d+(\.)(?=\s*\W*[a-zA-Z]+\w*\W*)
+     * NOTE: The fullstop is captured in this alternative.
+     * This matches against any fullstop preceeded by a string of digits, that
+     * come after a whitespace, and succeeded by a string of characters that
+     * contains at least 1 alphabetical character.
+     * This is to ensure that a fullstop that comes after, for instance, a year
+     * in numerical format (e.g. I was born in 2000. I am now 21 years old) will
+     * be used as a splitting point if it is followed by a string that contains
+     * alphabetical characters.
      *
-     * If the sentence ends with something like an IP address (127.0.0.1.),
-     * then the pattern will only match the last full stop.
-     *
-     *
-     * The last alternative is the simplest:
-     * \.$
-     *
-     * It matches the full stop at the end of the provided text.
+     * The last alternative is this:
+     * (\.)$
+     * NOTE: The fullstop is captured in this alternative.
+     * This is the simplest alternative. It basically matches any fullstop that
+     * comes at the end of a string.
      */
 
     const removeFullstopPattern =
@@ -166,8 +163,8 @@ function splitAtFullstops(text) {
                 return text.slice(0, splitIndex);
             }
 
-            if (index + 1 === arr.length && splitIndex + 1 < text.length) {
-                return text.slice(splitIndex);
+            if (index + 1 === arr.length) {
+                return text.slice(arr[index - 1]);
             }
 
             return text.slice(arr[index - 1], splitIndex);

@@ -1,51 +1,51 @@
-import darkTheme from "../themes/threadder-dark-theme";
+const hashtagAndMentionRegex = /(@\w+|#\w*[a-zA-Z]+\w*)/g;
+const urlRegex =
+    /(https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&//=]*))/g;
 
-export function matchEntitiesInTweet(tweet) {
-    // This matches mentions and hashtags
-    // TODO: Add URL pattern as well
-    const pattern = /@\w+|#\w+[a-zA-Z]+\w+/g;
+function splitTweetEntities(tweet) {
+    /**
+     * Takes a string of text and splits any items that match
+     * the global defined regex patterns and returns an array
+     * that contains the text broken into different elements
+     * that include the parts of the string that matched the
+     * patterns.
+     */
 
-    let matches;
+    return tweet
+        .split(hashtagAndMentionRegex)
+        .map((item) => {
+            if (!item) {
+                return "";
+            }
+
+            return item.split(urlRegex);
+        })
+        .flat()
+        .filter((item) => item && item !== "");
+}
+
+export function highlightTweetEntities(tweet, HashtagAndMention, URL) {
+    /**
+     * Converts all of the tweet entities into their respective
+     * React components.
+     */
+
+    let output = [];
 
     if (typeof tweet === "string") {
-        matches = tweet.matchAll(pattern) ?? [];
-    }
+        output = splitTweetEntities(tweet).map((item, index) => {
+            if (hashtagAndMentionRegex.test(item)) {
+                return (
+                    <HashtagAndMention key={`${item}-${index}`} text={item} />
+                );
+            }
 
-    return matches;
-}
+            if (urlRegex.test(item)) {
+                return <URL key={`${item}-${index}`} url={item} />;
+            }
 
-function reverseSortMatchesArray(matchesArr) {
-    const arr = Array.from(matchesArr);
-
-    const compareFunc = (a, b) => {
-        return b.index - a.index;
-    };
-
-    return arr.sort(compareFunc);
-}
-
-function highlightEntity(tweet, matchObj) {
-    const highlightColor = darkTheme.palette.secondary.main;
-
-    let output = tweet;
-
-    const start = output.slice(0, matchObj.index);
-    const end = output.slice(matchObj.index + matchObj[0].length);
-
-    return (
-        start +
-        `<strong style="color: ${highlightColor};">${matchObj[0]}</strong>` +
-        end
-    );
-}
-
-export function highlightTweetEntities(tweet, matchesArray) {
-    let output = tweet;
-
-    const reversedArray = reverseSortMatchesArray(matchesArray);
-
-    for (const match of reversedArray) {
-        output = highlightEntity(output, match);
+            return item;
+        });
     }
 
     return output;
