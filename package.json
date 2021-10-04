@@ -38,7 +38,6 @@
     "scripts": {
         "start": "react-scripts start",
         "build": "react-scripts build",
-        "localDeploy": "yarn build && cp -R build/* ../threadder-backend/src/public/",
         "test": "react-scripts test",
         "eject": "react-scripts eject",
         "push": "git add . && git commit -a && git push -u origin main"
