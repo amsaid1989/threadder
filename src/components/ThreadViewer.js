@@ -108,7 +108,9 @@ export default function ThreadViewer(props) {
     // scroll the thread viewer to the bottom to display the last tweet
     useEffect(() => {
         if (containerRef) {
-            containerRef.current.scrollTop = containerRef.current.scrollTopMax;
+            containerRef.current.scrollTop = Math.round(
+                props.scroll * containerRef.current.scrollTopMax
+            );
         }
     });
 

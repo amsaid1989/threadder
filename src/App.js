@@ -111,6 +111,7 @@ export default function App(props) {
         start: tweetText.length,
         end: tweetText.length,
     });
+    const [scrollPosition, setScrollPosition] = useState(0);
     const [thread, setThread] = useState([]);
     const [editing, setEditing] = useState(true);
     /* END APP STATE */
@@ -517,6 +518,12 @@ export default function App(props) {
             return () => clearTimeout(closeAlertTimeout);
         }
     }, [alertVisibility]);
+
+    // Update the scroll position of the Thread Viewer when the
+    // tweet text or the cursor position changes
+    useEffect(() => {
+        setScrollPosition(cursorPosition.end / tweetText.length);
+    }, [cursorPosition, tweetText]);
     /* END SIDE EFFECTS */
 
     return (
@@ -596,6 +603,7 @@ export default function App(props) {
                                     <ThreadViewer
                                         user={user}
                                         thread={thread}
+                                        scroll={scrollPosition}
                                         editThreadHandler={toggleEditing}
                                         publishHandler={publishThreadHandler}
                                         setAlertData={displayAlert}
