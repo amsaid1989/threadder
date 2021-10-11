@@ -104,13 +104,16 @@ export default function ThreadViewer(props) {
 
     const containerRef = useRef(null);
 
-    // When a new tweet is added that makes the thread viewer overflow,
-    // scroll the thread viewer to the bottom to display the last tweet
+    // Scroll the thread viewer to the tweet currently being edited
+    // by the user
     useEffect(() => {
         if (containerRef) {
-            containerRef.current.scrollTop = Math.floor(
-                props.scroll * containerRef.current.scrollTopMax
-            );
+            const scrollMaxLength =
+                containerRef.current.scrollHeight -
+                containerRef.current.clientHeight;
+
+            containerRef.current.scrollTop =
+                Math.floor(props.scroll * scrollMaxLength) - 40;
         }
     });
 
