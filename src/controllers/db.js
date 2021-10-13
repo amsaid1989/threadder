@@ -37,6 +37,7 @@ export function openDB() {
             THREADDER_DB_VERSION
         );
 
+        // EVENT HANDLERS
         openRequest.addEventListener("error", (event) => {
             const error = event.target.error;
 
@@ -84,6 +85,7 @@ export function clearImagesFromDB() {
 
         const clearRequest = store.clear();
 
+        // EVENT HANDLERS
         transaction.addEventListener("error", () => {
             return "Clear images transaction failed";
         });
@@ -112,7 +114,8 @@ function addOrUpdateImages(tweetIndex, imgArr, storeOperation) {
             // the file name and the file type.
             // The reason we convert the file objects to array
             // buffers is that, according to this article on Google
-            // developers website (https://developers.google.com/web/fundamentals/instant-and-offline/web-storage/indexeddb-best-practices#not_everything_can_be_stored_in_indexeddb_on_all_platforms)
+            // developers website
+            // (https://developers.google.com/web/fundamentals/instant-and-offline/web-storage/indexeddb-best-practices#not_everything_can_be_stored_in_indexeddb_on_all_platforms)
             // storing File objects in an indexedDB doesn't work well
             // on all platforms.
             fileObjectsToBuffers(imgArr)
@@ -188,6 +191,7 @@ function getOrDeleteImagesFromDB(tweetIndex, storeOperation) {
 
             const request = store[storeOperation](tweetIndex);
 
+            // EVENT HANDLERS
             const errorHandler = () => {
                 reject("Failed to complete the required database operation");
             };
@@ -283,6 +287,7 @@ export function getAllImagesFromDB() {
 
             const request = store.getAll();
 
+            // EVENT HANDLERS
             const errorHandler = () => {
                 reject("Failed to retrieve images from the database");
             };
