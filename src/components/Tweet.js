@@ -249,7 +249,8 @@ export default function Tweet(props) {
         (async () => {
             if (dbConnected()) {
                 // Checks if there is an entry for the tweet
-                // already in the database.
+                // already in the database. Resolves to either
+                // true or false
                 const checkIndex = await indexExistsInDB(tweetIndex);
 
                 if (checkIndex) {

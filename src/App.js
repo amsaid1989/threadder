@@ -270,29 +270,29 @@ export default function App(props) {
 
         const toPublish = thread.map((tweet) => ({ text: tweet, media: [] }));
 
-        const allImages = await getAllImagesFromDB();
+        try {
+            const allImages = await getAllImagesFromDB();
 
-        if (allImages instanceof Array && allImages.length > 0) {
-            for (const tweetImages of allImages) {
-                const index = Number(tweetImages.tweetIndex);
+            if (allImages instanceof Array && allImages.length > 0) {
+                for (const tweetImages of allImages) {
+                    const index = Number(tweetImages.tweetIndex);
 
-                try {
                     const mediaIDs = await publishAllTweetImages(
                         tweetImages.files
                     );
 
                     toPublish[index].media = mediaIDs;
-                } catch {
-                    closeDialog();
-
-                    displayAlert(
-                        "error",
-                        "Thread publishing was cancelled because publishing the images failed"
-                    );
-
-                    return;
                 }
             }
+        } catch {
+            closeDialog();
+
+            displayAlert(
+                "error",
+                "Thread publishing was cancelled because publishing the images failed"
+            );
+
+            return;
         }
 
         publishThread(toPublish)
@@ -353,8 +353,6 @@ export default function App(props) {
 
     /* SIDE EFFECTS */
     // Runs when the app loads and tries to open the database.
-    // TODO: Check to make sure that this hook doesn't keep running
-    // if the connection to database fails.
     useEffect(() => {
         if (!dbOpen) {
             openDB()
@@ -366,21 +364,6 @@ export default function App(props) {
                 });
         }
     }, [dbOpen, displayAlert]);
-
-    // Once a login attempt is complete and the app reloads, check
-    // the session store to display the appropriate alert depending
-    // on whether the attempt was successful or not
-    useEffect(() => {
-        if (getStorageItem("session", "loginSuccessMessage")) {
-            setStorageItem("session", "loginSuccessMessage", false);
-
-            displayAlert("success", "You are now logged in");
-        } else if (getStorageItem("session", "loginFailMessage")) {
-            setStorageItem("session", "loginFailMessage", false);
-
-            displayAlert("error", "Login failed");
-        }
-    }, [displayAlert]);
 
     // When the backend redirects to the app, set the user to logged
     // in if the process was successful. It also sets some values in
@@ -403,17 +386,58 @@ export default function App(props) {
         }
     }, []);
 
+    // Once a login attempt is complete and the app reloads, check
+    // the session store to display the appropriate alert depending
+    // on whether the attempt was successful or not
+    useEffect(() => {
+        if (getStorageItem("session", "loginSuccessMessage")) {
+            setStorageItem("session", "loginSuccessMessage", false);
+
+            displayAlert("success", "You are now logged in");
+        } else if (getStorageItem("session", "loginFailMessage")) {
+            setStorageItem("session", "loginFailMessage", false);
+
+            displayAlert("error", "Login failed");
+        }
+    }, [displayAlert]);
+
+    // If a login attempt was completed successfully as a result of
+    // the user clicking the Publish Thread button, then complete
+    // publishing the thread
     useEffect(() => {
         if (
             document.location.search === "" &&
             thread.length > 0 &&
+            loggedIn &&
             getStorageItem("session", "publishAfterLogin")
         ) {
-            setStorageItem("session", "publishAfterLogin", false);
+            let timeout, interval;
 
-            publishTweets();
+            // Ensure database is connected before attempting to
+            // publish the thread
+            interval = setInterval(() => {
+                if (dbOpen) {
+                    clearInterval(interval);
+                    clearTimeout(timeout);
+
+                    setStorageItem("session", "publishAfterLogin", false);
+
+                    publishTweets();
+                }
+            }, 500);
+
+            // Cancel publishing attempt if the database isn't
+            // connected after 5 seconds
+            timeout = setTimeout(() => {
+                clearInterval(interval);
+
+                displayAlert(
+                    "error",
+                    "Publishing the thread failed because the database isn't connected"
+                );
+            }, 5000);
         }
-    }, [thread, publishTweets]);
+    }, [thread, loggedIn, dbOpen, publishTweets, displayAlert]);
 
     // On every update, make sure that the TweetInput area has its
     // cursor in the correct place. This is to ensure that, when the

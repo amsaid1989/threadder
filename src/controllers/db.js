@@ -189,11 +189,11 @@ function getOrDeleteImagesFromDB(tweetIndex, storeOperation) {
             const request = store[storeOperation](tweetIndex);
 
             const errorHandler = () => {
-                reject("Failed to save images to database");
+                reject("Failed to complete the required database operation");
             };
 
             transaction.addEventListener("abort", () => {
-                reject("Adding images to the database was aborted");
+                reject("Database operation was aborted");
             });
 
             transaction.addEventListener("error", errorHandler);
@@ -204,7 +204,9 @@ function getOrDeleteImagesFromDB(tweetIndex, storeOperation) {
 
             request.addEventListener("error", errorHandler);
         } else {
-            reject("Can't save any images because the database isn't open");
+            reject(
+                "Can't complete the database operation because the database isn't open"
+            );
         }
     });
 }
@@ -236,7 +238,7 @@ export function reloadImagesFromDB(tweetIndex) {
             .then((results) => {
                 if (results) {
                     // Convert the buffers back to file objects
-                    // before loading them in the UI.
+                    // so they can be loaded in the UI
                     resolve(buffersToFileObjects(results.buffers));
                 } else {
                     resolve([]);
@@ -297,11 +299,9 @@ export function getAllImagesFromDB() {
                 let out = [];
 
                 for (let tweet of event.target.result) {
-                    const buffers = tweet.buffers;
+                    tweet.files = buffersToFileObjects(tweet.buffers);
 
                     delete tweet.buffers;
-
-                    tweet.files = buffersToFileObjects(buffers);
 
                     out.push(tweet);
                 }
