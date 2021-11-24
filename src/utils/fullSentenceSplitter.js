@@ -160,15 +160,25 @@ function splitAtFullstops(text) {
     return splitIndices
         .map((splitIndex, index, arr) => {
             if (index === 0) {
-                return text.slice(0, splitIndex);
+                if (arr.length > 1) {
+                    return text.slice(0, splitIndex);
+                } else {
+                    return [text.slice(0, splitIndex), text.slice(splitIndex)];
+                }
             }
 
             if (index + 1 === arr.length) {
-                return text.slice(arr[index - 1]);
+                const prevSplitIndex = arr[index - 1];
+
+                return [
+                    text.slice(prevSplitIndex, splitIndex),
+                    text.slice(splitIndex),
+                ];
             }
 
             return text.slice(arr[index - 1], splitIndex);
         })
+        .flat()
         .map((tweet) => trimTopAndTailSpaces(tweet));
 }
 
